@@ -32,6 +32,11 @@ local function disableFarmBoss()
         farmBossToggleBtn.BackgroundColor3 = NexusX.Colors.toggleOff
         if farmBossToggleDot then farmBossToggleDot.Position = UDim2.new(0, 2, 0.5, -8) end
     end
+    local char = NexusX.Player.Character
+    if char then
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then hum.AutoRotate = true end
+    end
 end
 
 local farmBossToggleFrame = UI.createToggle(content, "FARM BOSS", 15, Settings.farmBoss, function(v)
@@ -63,7 +68,8 @@ RunService.Heartbeat:Connect(function()
     if not char then return end
 
     local hrp = char:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hrp or not hum then return end
 
     local bModel, bPart = getBoss()
 
@@ -87,6 +93,8 @@ RunService.Heartbeat:Connect(function()
         if part:IsA("BasePart") then part.CanCollide = false end
     end
 
+    hum.AutoRotate = false
+
     local attackKind = bModel:GetAttribute("BossAttackKind")
     local targetPos
 
@@ -108,7 +116,7 @@ RunService.Heartbeat:Connect(function()
         lookAtTarget = targetPos + Vector3.new(0, 0, -1)
     end
 
-    char:PivotTo(CFrame.lookAt(targetPos, lookAtTarget))
+    hrp.CFrame = CFrame.lookAt(targetPos, lookAtTarget)
     
     NexusX.createHitbox(bPart)
 
