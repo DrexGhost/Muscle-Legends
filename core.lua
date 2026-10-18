@@ -69,6 +69,15 @@ Core.CHESTS = {
     { name = "Overcharged", coords = Vector3.new(-2297, 195, 5506) },
 }
 
+Core.BOSS_HEIGHTS = {
+    Boss1 = 143,
+    Boss2 = 143,
+    Boss3 = 143,
+    Boss4 = 143,
+    Boss5 = 143,
+    Boss6 = 143
+}
+
 Core.EVENT_BOSSES = {
     EXTREME = { model = "Grim Reaper", part = "Body0021" },
     HARD = { model = "Frankenbrute", part = "BODY" },
@@ -96,7 +105,6 @@ end
 
 Core.toggleRefs = {}
 Core.sliderRefs = {}
-Core.partBtnRefs = {}
 
 function Core.loadSettings()
     local success, result = pcall(function()
@@ -203,38 +211,6 @@ function Core.deleteConfig(name)
     return pcall(function() delfile(path) end)
 end
 
-function Core.getBoss()
-    local events = workspace:FindFirstChild("Events")
-    local arena = events and events:FindFirstChild("BossArena")
-    if not arena then return nil end
-    for _, model in ipairs(arena:GetChildren()) do
-        local part = model:FindFirstChild("Boss")
-        if part and part:IsA("BasePart") then
-            local hp = model:GetAttribute("Health") or part:GetAttribute("Health") or 100
-            if hp > 0 and part.Position.Y > 0 then
-                return model, part
-            end
-        end
-    end
-    return nil
-end
-
-function Core.getEventBoss()
-    for _, name in ipairs(Core.EVENT_BOSS_ORDER) do
-        if Core.settings.eventBosses[name] then
-            local b = Core.EVENT_BOSSES[name]
-            local model = workspace:FindFirstChild(b.model)
-            if model then
-                local part = model:FindFirstChild(b.part)
-                if part and part.Position.Y > 0 then
-                    return model, part
-                end
-            end
-        end
-    end
-    return nil
-end
-
 function Core.hasDumbbell()
     local char = LocalPlayer.Character
     if not char then return false end
@@ -311,114 +287,6 @@ function Core.getUltimateLevel(name)
     local attr = "Ultimate" .. name:gsub("%s+", "")
     local v = LocalPlayer:GetAttribute(attr)
     return typeof(v) == "number" and v or 0
-end
-
-function Core.startLoops()
-    local lastAttack, lastRebirth, lastUltimate = 0, 0, 0
-    local lastAutoStr, lastAutoClick, lastChestTime = 0, 0, 0
-    local chestIndex = 1
-    
-    RunService.Heartbeat:Connect(function()
-        local char = LocalPlayer.Character
-        if not char then return end
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if not hrp or not hum then return end
-
-        local now = os.clock()
-
-        if Core.settings.noclip then
-            for _, p in ipairs(char:GetDescendants()) do
-                if p:IsA("BasePart") then p.CanCollide = false end
-            end
-        end
-
-        if Core.settings.speed then
-            if hum.WalkSpeed ~= Core.settings.walkSpeed then hum.WalkSpeed = Core.settings.walkSpeed end
-        end
-
-        if Core.settings.size then
-            if math.abs((hrp.Size.X / 2) - Core.settings.sizeValue) > 0.1 then
-                Core.setSize(Core.settings.sizeValue)
-            end
-        end
-
-        if Core.settings.autoStrength then
-            if now - lastAutoStr > 0.15 then
-                lastAutoStr = now
-                if not Core.hasDumbbell() then Core.equipDumbbell() end
-                if Core.hasDumbbell() then
-                    local tool = char:FindFirstChildOfClass("Tool")
-                    if tool then pcall(function() tool:Activate() end) end
-                end
-            end
-        end
-
-        if Core.settings.autoClicker then
-            if now - lastAutoClick > 0.05 then
-                lastAutoClick = now
-                Core.doClicker()
-            end
-        end
-
-        if Core.settings.autoRebirth then
-            if now - lastRebirth > 2 then
-                lastRebirth = now
-                Core.doRebirth()
-            end
-        end
-
-        if Core.settings.collectChest then
-            if now - lastChestTime > 2 then
-                lastChestTime = now
-                local chest = Core.CHESTS[chestIndex]
-                if chest then
-                    hum.PlatformStand = true
-                    hrp.CFrame = CFrame.new(chest.coords + Vector3.new(0, 3, 0))
-                end
-                chestIndex = chestIndex + 1
-                if chestIndex > #Core.CHESTS then
-                    chestIndex = 1
-                end
-            end
-        end
-
-        local targetBoss = nil
-        if Core.settings.bossFarm then targetBoss = Core.getBoss() end
-        if Core.settings.autoEventFarm then targetBoss = Core.getEventBoss() end
-
-        if targetBoss then
-            local part = targetBoss:FindFirstChild("Boss") or targetBoss:FindFirstChildWhichIsA("BasePart")
-            if part then
-                hum.PlatformStand = true
-                hrp.CFrame = CFrame.lookAt(part.Position + Vector3.new(0, 51, 0), part.Position)
-                if now - lastAttack > 0.4 then
-                    lastAttack = now
-                    Core.punch()
-                end
-            end
-        else
-            if Core.settings.bossFarm or Core.settings.autoEventFarm then
-                if not Core.settings.collectChest then
-                    hum.PlatformStand = false
-                end
-            end
-        end
-
-        if now - lastUltimate > 2 then
-            lastUltimate = now
-            for _, name in ipairs(Core.ABSOLUTE_ORDER) do
-                if Core.settings.ultimates[name] then
-                    local lvl = Core.getUltimateLevel(name)
-                    local max = 5
-                    if lvl < max then
-                        Core.upgradeUltimate(name)
-                        break
-                    end
-                end
-            end
-        end
-    end)
 end
 
 return Core
