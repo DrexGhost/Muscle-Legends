@@ -1,94 +1,19 @@
-local NexusX = _G.NexusX
-local content = NexusX.Gui.Contents["MOVEMENT"]
-local UI = NexusX.UI
-local Settings = NexusX.Settings
+local Core, GUI = ...
 
-local speedConnection, noclipConnection
+local function build()
+    local tab = GUI.makeTab("Movement", 5, "motion")
+    local page = GUI.makePage()
 
-local function applySpeed()
-    if not NexusX.Player.Character then return end
-    local hum = NexusX.Player.Character:FindFirstChildOfClass("Humanoid")
-    if hum then hum.WalkSpeed = Settings.speedValue end
+    GUI.makeSectionHeader(page, "Player", 1)
+    GUI.makeToggle(page, "Noclip", "Проходить сквозь стены", Core.settings.noclip, 2, function(v) Core.settings.noclip = v end, "noclip")
+    GUI.makeToggle(page, "Speed", "Ускорение", Core.settings.speed, 3, function(v) Core.settings.speed = v end, "speed")
+    GUI.makeToggle(page, "Size", "Размер персонажа", Core.settings.size, 4, function(v) Core.settings.size = v end, "size")
+
+    GUI.makeSectionHeader(page, "Settings", 5)
+    GUI.makeSlider(page, "Speed Value", 16, 200, Core.settings.walkSpeed, 6, function(v) Core.settings.walkSpeed = v end, "walkSpeed")
+    GUI.makeSlider(page, "Size Value", 1, 10, Core.settings.sizeValue, 7, function(v) Core.settings.sizeValue = v end, "sizeValue")
+
+    tab.Button.MouseButton1Click:Connect(function() GUI.switchTab(tab, page) end)
+    return tab, page
 end
-
-local function stopSpeed()
-    if speedConnection then speedConnection:Disconnect(); speedConnection = nil end
-    if NexusX.Player.Character then
-        local hum = NexusX.Player.Character:FindFirstChildOfClass("Humanoid")
-        if hum then hum.WalkSpeed = 16 end
-    end
-end
-
-local function applyNoclip()
-    if not NexusX.Player.Character then return end
-    for _, part in ipairs(NexusX.Player.Character:GetDescendants()) do
-        if part:IsA("BasePart") then part.CanCollide = false end
-    end
-end
-
-local function stopNoclip()
-    if noclipConnection then noclipConnection:Disconnect(); noclipConnection = nil end
-    if NexusX.Player.Character then
-        for _, part in ipairs(NexusX.Player.Character:GetDescendants()) do
-            if part:IsA("BasePart") then part.CanCollide = true end
-        end
-    end
-end
-
-UI.createToggle(content, "NOCLIP", 15, Settings.noclip, function(v)
-    Settings.noclip = v
-    if v then
-        applyNoclip()
-        if noclipConnection then noclipConnection:Disconnect() end
-        noclipConnection = NexusX.RunService.Stepped:Connect(function()
-            if Settings.noclip then applyNoclip() end
-        end)
-    else
-        stopNoclip()
-    end
-end, "noclip")
-
-UI.createToggle(content, "SPEED", 55, Settings.speed, function(v)
-    Settings.speed = v
-    if v then
-        applySpeed()
-        if speedConnection then speedConnection:Disconnect() end
-        speedConnection = NexusX.RunService.Heartbeat:Connect(function()
-            if Settings.speed and NexusX.Player.Character then
-                local hum = NexusX.Player.Character:FindFirstChildOfClass("Humanoid")
-                if hum and hum.WalkSpeed ~= Settings.speedValue then hum.WalkSpeed = Settings.speedValue end
-            end
-        end)
-    else
-        stopSpeed()
-    end
-end, "speed")
-
-UI.createSlider(content, "SPEED", 100, 16, 500, Settings.speedValue, function(v)
-    Settings.speedValue = v
-end, "speedValue")
-
-table.insert(NexusX.Features.OnSettingsLoaded, function()
-    if Settings.speed then
-        applySpeed()
-        if speedConnection then speedConnection:Disconnect() end
-        speedConnection = NexusX.RunService.Heartbeat:Connect(function()
-            if Settings.speed and NexusX.Player.Character then
-                local hum = NexusX.Player.Character:FindFirstChildOfClass("Humanoid")
-                if hum and hum.WalkSpeed ~= Settings.speedValue then hum.WalkSpeed = Settings.speedValue end
-            end
-        end)
-    else
-        stopSpeed()
-    end
-
-    if Settings.noclip then
-        applyNoclip()
-        if noclipConnection then noclipConnection:Disconnect() end
-        noclipConnection = NexusX.RunService.Stepped:Connect(function()
-            if Settings.noclip then applyNoclip() end
-        end)
-    else
-        stopNoclip()
-    end
-end)
+return build
