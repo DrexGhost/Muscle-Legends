@@ -42,6 +42,7 @@ Core.settings = {
     autoRebirth = false,
     autoClicker = false,
     bossFarm = false,
+    collectChest = false,
     noclip = false,
     speed = false,
     walkSpeed = 50,
@@ -55,6 +56,17 @@ Core.settings = {
     guiScale = 85,
     floatBtnSize = 58,
     floatBtnPos = {0, 20, 0.5, 0}
+}
+
+Core.CHESTS = {
+    { name = "Golden", coords = Vector3.new(-139, 7, -275) },
+    { name = "Enchanted", coords = Vector3.new(-2569, 7, -556) },
+    { name = "Mythical", coords = Vector3.new(2208, 7, 912) },
+    { name = "Magma", coords = Vector3.new(-6714, 7, -1459) },
+    { name = "Legends", coords = Vector3.new(4667, 1000, -3694) },
+    { name = "Jungle", coords = Vector3.new(-7915, 41, 3026) },
+    { name = "Industrial", coords = Vector3.new(-4757, 99, 5580) },
+    { name = "Overcharged", coords = Vector3.new(-2297, 195, 5506) },
 }
 
 Core.EVENT_BOSSES = {
@@ -303,7 +315,8 @@ end
 
 function Core.startLoops()
     local lastAttack, lastRebirth, lastUltimate = 0, 0, 0
-    local lastAutoStr, lastAutoClick = 0, 0
+    local lastAutoStr, lastAutoClick, lastChestTime = 0, 0, 0
+    local chestIndex = 1
     
     RunService.Heartbeat:Connect(function()
         local char = LocalPlayer.Character
@@ -355,6 +368,21 @@ function Core.startLoops()
             end
         end
 
+        if Core.settings.collectChest then
+            if now - lastChestTime > 2 then
+                lastChestTime = now
+                local chest = Core.CHESTS[chestIndex]
+                if chest then
+                    hum.PlatformStand = true
+                    hrp.CFrame = CFrame.new(chest.coords + Vector3.new(0, 3, 0))
+                end
+                chestIndex = chestIndex + 1
+                if chestIndex > #Core.CHESTS then
+                    chestIndex = 1
+                end
+            end
+        end
+
         local targetBoss = nil
         if Core.settings.bossFarm then targetBoss = Core.getBoss() end
         if Core.settings.autoEventFarm then targetBoss = Core.getEventBoss() end
@@ -371,7 +399,9 @@ function Core.startLoops()
             end
         else
             if Core.settings.bossFarm or Core.settings.autoEventFarm then
-                hum.PlatformStand = false
+                if not Core.settings.collectChest then
+                    hum.PlatformStand = false
+                end
             end
         end
 
