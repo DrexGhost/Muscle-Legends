@@ -2,6 +2,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
 local RS = game:GetService("ReplicatedStorage")
+local VIM = game:GetService("VirtualInputManager")
 
 local LocalPlayer = Players.LocalPlayer
 local rEvents = RS:FindFirstChild("rEvents")
@@ -47,13 +48,22 @@ Core.settings = {
     size = false,
     sizeValue = 2,
     autoEventFarm = false,
-    eventBoss = "EXTREME",
+    eventBosses = {EASY = false, MEDIUM = false, HARD = false, EXTREME = false},
     ultimates = {},
     watermark = false,
+    watermarkScale = 100,
     guiScale = 85,
     floatBtnSize = 58,
     floatBtnPos = {0, 20, 0.5, 0}
 }
+
+Core.EVENT_BOSSES = {
+    EXTREME = { model = "Grim Reaper", part = "Body0021" },
+    HARD = { model = "Frankenbrute", part = "BODY" },
+    MEDIUM = { model = "Pumpkin Titan", part = "Mesh.001" },
+    EASY = { model = "Scarecrow Colossus", part = "Cube.004" }
+}
+Core.EVENT_BOSS_ORDER = {"EXTREME", "HARD", "MEDIUM", "EASY"}
 
 Core.ABSOLUTE_ORDER = {
     "Golden Rebirth", "Galaxy Gains", "Muscle Mind", "Demon Damage",
@@ -198,18 +208,18 @@ function Core.getBoss()
 end
 
 function Core.getEventBoss()
-    local bosses = {
-        EXTREME = { model = "Grim Reaper", part = "Body0021" },
-        HARD = { model = "Frankenbrute", part = "BODY" },
-        MEDIUM = { model = "Pumpkin Titan", part = "Mesh.001" },
-        EASY = { model = "Scarecrow Colossus", part = "Cube.004" }
-    }
-    local b = bosses[Core.settings.eventBoss]
-    if not b then return nil end
-    local model = workspace:FindFirstChild(b.model)
-    if not model then return nil end
-    local part = model:FindFirstChild(b.part)
-    if part and part.Position.Y > 0 then return model, part end
+    for _, name in ipairs(Core.EVENT_BOSS_ORDER) do
+        if Core.settings.eventBosses[name] then
+            local b = Core.EVENT_BOSSES[name]
+            local model = workspace:FindFirstChild(b.model)
+            if model then
+                local part = model:FindFirstChild(b.part)
+                if part and part.Position.Y > 0 then
+                    return model, part
+                end
+            end
+        end
+    end
     return nil
 end
 
@@ -238,6 +248,11 @@ function Core.equipDumbbell()
             end
         end
     end
+end
+
+function Core.doClicker()
+    VIM:SendMouseButtonEvent(0, 0, 0, true, game, 0)
+    VIM:SendMouseButtonEvent(0, 0, 0, false, game, 0)
 end
 
 function Core.punch()
@@ -288,6 +303,7 @@ end
 
 function Core.startLoops()
     local lastAttack, lastRebirth, lastUltimate = 0, 0, 0
+    local lastAutoStr, lastAutoClick = 0, 0
     
     RunService.Heartbeat:Connect(function()
         local char = LocalPlayer.Character
@@ -295,6 +311,8 @@ function Core.startLoops()
         local hrp = char:FindFirstChild("HumanoidRootPart")
         local hum = char:FindFirstChildOfClass("Humanoid")
         if not hrp or not hum then return end
+
+        local now = os.clock()
 
         if Core.settings.noclip then
             for _, p in ipairs(char:GetDescendants()) do
@@ -313,22 +331,26 @@ function Core.startLoops()
         end
 
         if Core.settings.autoStrength then
-            if not Core.hasDumbbell() then Core.equipDumbbell() end
-            if Core.hasDumbbell() then
-                local tool = char:FindFirstChildOfClass("Tool")
-                if tool then pcall(function() tool:Activate() end) end
+            if now - lastAutoStr > 0.15 then
+                lastAutoStr = now
+                if not Core.hasDumbbell() then Core.equipDumbbell() end
+                if Core.hasDumbbell() then
+                    local tool = char:FindFirstChildOfClass("Tool")
+                    if tool then pcall(function() tool:Activate() end) end
+                end
             end
-            task.wait(0.1)
         end
 
         if Core.settings.autoClicker then
-            Core.punch()
-            task.wait(0.01)
+            if now - lastAutoClick > 0.05 then
+                lastAutoClick = now
+                Core.doClicker()
+            end
         end
 
         if Core.settings.autoRebirth then
-            if os.clock() - lastRebirth > 2 then
-                lastRebirth = os.clock()
+            if now - lastRebirth > 2 then
+                lastRebirth = now
                 Core.doRebirth()
             end
         end
@@ -342,7 +364,6 @@ function Core.startLoops()
             if part then
                 hum.PlatformStand = true
                 hrp.CFrame = CFrame.lookAt(part.Position + Vector3.new(0, 51, 0), part.Position)
-                local now = os.clock()
                 if now - lastAttack > 0.4 then
                     lastAttack = now
                     Core.punch()
@@ -354,8 +375,8 @@ function Core.startLoops()
             end
         end
 
-        if os.clock() - lastUltimate > 2 then
-            lastUltimate = os.clock()
+        if now - lastUltimate > 2 then
+            lastUltimate = now
             for _, name in ipairs(Core.ABSOLUTE_ORDER) do
                 if Core.settings.ultimates[name] then
                     local lvl = Core.getUltimateLevel(name)
