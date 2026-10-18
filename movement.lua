@@ -36,6 +36,30 @@ local function build()
     GUI.makeSlider(page, "Speed Value", 16, 200, Core.settings.walkSpeed, 6, function(v) Core.settings.walkSpeed = v end, "walkSpeed")
     GUI.makeSlider(page, "Size Value", 1, 100, Core.settings.sizeValue, 7, function(v) Core.settings.sizeValue = v end, "sizeValue")
 
+    RunService.Heartbeat:Connect(function()
+        local char = LocalPlayer.Character
+        if not char then return end
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if not hrp or not hum then return end
+
+        if Core.settings.noclip then
+            for _, p in ipairs(char:GetDescendants()) do
+                if p:IsA("BasePart") then p.CanCollide = false end
+            end
+        end
+
+        if Core.settings.speed then
+            if hum.WalkSpeed ~= Core.settings.walkSpeed then hum.WalkSpeed = Core.settings.walkSpeed end
+        end
+
+        if Core.settings.size then
+            if math.abs((hrp.Size.X / 2) - Core.settings.sizeValue) > 0.1 then
+                Core.setSize(Core.settings.sizeValue)
+            end
+        end
+    end)
+
     tab.Button.MouseButton1Click:Connect(function() GUI.switchTab(tab, page) end)
     return tab, page
 end
