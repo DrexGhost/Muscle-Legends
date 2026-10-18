@@ -62,7 +62,7 @@ Instance.new("UICorner", logoBox).CornerRadius = UDim.new(0, 9)
 local logoText = Instance.new("TextLabel")
 logoText.Size = UDim2.new(1, 0, 1, 0)
 logoText.BackgroundTransparency = 1
-logoText.Text = "N"
+logoText.Text = "M"
 logoText.TextColor3 = Color3.fromRGB(10, 14, 24)
 logoText.TextSize = 20
 logoText.Font = Enum.Font.GothamBlack
@@ -83,7 +83,7 @@ local versionLabel = Instance.new("TextLabel")
 versionLabel.Size = UDim2.new(0, 200, 0, 14)
 versionLabel.Position = UDim2.new(0, 68, 0, 30)
 versionLabel.BackgroundTransparency = 1
-versionLabel.Text = "Nexus X"
+versionLabel.Text = "NexusX"
 versionLabel.TextColor3 = T.textMuted
 versionLabel.TextSize = 10
 versionLabel.Font = Enum.Font.Gotham
@@ -152,17 +152,14 @@ local function buildIcon(holder, kind, color)
     base.Position = UDim2.new(0, 3, 0.5, -8)
     base.BackgroundTransparency = 1
     base.Parent = holder
+    
     local function mk(size, pos, z)
         local f = Instance.new("Frame")
-        f.Size = size
-        f.Position = pos
-        f.BackgroundColor3 = color
-        f.BorderSizePixel = 0
-        f.ZIndex = z or 2
-        f.Parent = base
+        f.Size = size; f.Position = pos; f.BackgroundColor3 = color; f.BorderSizePixel = 0; f.ZIndex = z or 2; f.Parent = base
         Instance.new("UICorner", f).CornerRadius = UDim.new(1, 0)
         return f
     end
+    
     if kind == "dashboard" then
         mk(UDim2.new(0, 14, 0, 5), UDim2.new(0, 1, 0, 0), 2)
         mk(UDim2.new(0, 6, 0, 7), UDim2.new(0, 1, 0, 7), 2)
@@ -172,6 +169,12 @@ local function buildIcon(holder, kind, color)
         l1.Size = UDim2.new(0, 14, 0, 2); l1.AnchorPoint = Vector2.new(0.5, 0.5); l1.Position = UDim2.new(0.5, 0, 0.5, 0); l1.Rotation = 45; l1.BackgroundColor3 = color; l1.BorderSizePixel = 0; l1.Parent = base
         local l2 = Instance.new("Frame")
         l2.Size = UDim2.new(0, 14, 0, 2); l2.AnchorPoint = Vector2.new(0.5, 0.5); l2.Position = UDim2.new(0.5, 0, 0.5, 0); l2.Rotation = -45; l2.BackgroundColor3 = color; l2.BorderSizePixel = 0; l2.Parent = base
+    elseif kind == "helper" then
+        mk(UDim2.new(0, 4, 0, 14), UDim2.new(0, 6, 0, 1), 2)
+        mk(UDim2.new(0, 10, 0, 4), UDim2.new(0, 3, 0, 6), 2)
+    elseif kind == "farm" then
+        mk(UDim2.new(0, 12, 0, 12), UDim2.new(0, 2, 0, 2), 1)
+        mk(UDim2.new(0, 4, 0, 4), UDim2.new(0, 6, 0, 6), 2)
     elseif kind == "motion" then
         mk(UDim2.new(0, 12, 0, 2), UDim2.new(0, 1, 0, 3), 1)
         mk(UDim2.new(0, 8, 0, 2), UDim2.new(0, 1, 0, 7), 1)
@@ -187,41 +190,19 @@ end
 function GUI.makeTab(text, order, iconKind)
     local tab = Instance.new("TextButton")
     tab.Size = UDim2.new(1, 0, 0, 36)
-    tab.BackgroundColor3 = T.card
-    tab.BackgroundTransparency = 1
-    tab.BorderSizePixel = 0
-    tab.Text = ""
-    tab.AutoButtonColor = false
-    tab.LayoutOrder = order
-    tab.Parent = Sidebar
+    tab.BackgroundColor3 = T.card; tab.BackgroundTransparency = 1; tab.BorderSizePixel = 0; tab.Text = ""; tab.AutoButtonColor = false; tab.LayoutOrder = order; tab.Parent = Sidebar
     Instance.new("UICorner", tab).CornerRadius = UDim.new(0, 8)
 
     local indicator = Instance.new("Frame")
-    indicator.Size = UDim2.new(0, 3, 0.55, 0)
-    indicator.Position = UDim2.new(0, 0, 0.225, 0)
-    indicator.BackgroundColor3 = T.accent
-    indicator.BorderSizePixel = 0
-    indicator.BackgroundTransparency = 1
-    indicator.Parent = tab
+    indicator.Size = UDim2.new(0, 3, 0.55, 0); indicator.Position = UDim2.new(0, 0, 0.225, 0); indicator.BackgroundColor3 = T.accent; indicator.BorderSizePixel = 0; indicator.BackgroundTransparency = 1; indicator.Parent = tab
     Instance.new("UICorner", indicator).CornerRadius = UDim.new(1, 0)
 
     local iconHolder = Instance.new("Frame")
-    iconHolder.Size = UDim2.new(0, 22, 1, 0)
-    iconHolder.Position = UDim2.new(0, 12, 0, 0)
-    iconHolder.BackgroundTransparency = 1
-    iconHolder.Parent = tab
+    iconHolder.Size = UDim2.new(0, 22, 1, 0); iconHolder.Position = UDim2.new(0, 12, 0, 0); iconHolder.BackgroundTransparency = 1; iconHolder.Parent = tab
     buildIcon(iconHolder, iconKind, T.textDim)
 
     local textLabel = Instance.new("TextLabel")
-    textLabel.Size = UDim2.new(1, -40, 1, 0)
-    textLabel.Position = UDim2.new(0, 40, 0, 0)
-    textLabel.BackgroundTransparency = 1
-    textLabel.Text = text
-    textLabel.TextColor3 = T.textDim
-    textLabel.TextSize = 12
-    textLabel.Font = Enum.Font.GothamMedium
-    textLabel.TextXAlignment = Enum.TextXAlignment.Left
-    textLabel.Parent = tab
+    textLabel.Size = UDim2.new(1, -40, 1, 0); textLabel.Position = UDim2.new(0, 40, 0, 0); textLabel.BackgroundTransparency = 1; textLabel.Text = text; textLabel.TextColor3 = T.textDim; textLabel.TextSize = 12; textLabel.Font = Enum.Font.GothamMedium; textLabel.TextXAlignment = Enum.TextXAlignment.Left; textLabel.Parent = tab
 
     local obj = { Button = tab, Indicator = indicator, IconHolder = iconHolder, Text = textLabel, Active = false, IconKind = iconKind }
 
@@ -259,26 +240,13 @@ end
 
 function GUI.makePage()
     local page = Instance.new("ScrollingFrame")
-    page.Size = UDim2.new(1, 0, 1, 0)
-    page.BackgroundTransparency = 1
-    page.BorderSizePixel = 0
-    page.CanvasSize = UDim2.new(0, 0, 0, 800)
-    page.AutomaticCanvasSize = Enum.AutomaticSize.Y
-    page.ScrollBarThickness = 3
-    page.ScrollBarImageColor3 = T.accent
-    page.ScrollBarImageTransparency = 0.5
-    page.Visible = false
-    page.Parent = Content
+    page.Size = UDim2.new(1, 0, 1, 0); page.BackgroundTransparency = 1; page.BorderSizePixel = 0; page.CanvasSize = UDim2.new(0, 0, 0, 800); page.AutomaticCanvasSize = Enum.AutomaticSize.Y; page.ScrollBarThickness = 3; page.ScrollBarImageColor3 = T.accent; page.ScrollBarImageTransparency = 0.5; page.Visible = false; page.Parent = Content
 
-    local layout = Instance.new("UIListLayout")
-    layout.Padding = UDim.new(0, 8)
-    layout.SortOrder = Enum.SortOrder.LayoutOrder
-    layout.Parent = page
+    local layout = Instance.new("UIListLayout", page)
+    layout.Padding = UDim.new(0, 8); layout.SortOrder = Enum.SortOrder.LayoutOrder
 
-    local pad = Instance.new("UIPadding")
-    pad.PaddingRight = UDim.new(0, 8)
-    pad.PaddingBottom = UDim.new(0, 8)
-    pad.Parent = page
+    local pad = Instance.new("UIPadding", page)
+    pad.PaddingRight = UDim.new(0, 8); pad.PaddingBottom = UDim.new(0, 8)
 
     table.insert(GUI._pages, page)
     return page
@@ -290,41 +258,20 @@ function GUI.switchTab(targetTab, targetPage)
 end
 
 function GUI.makeSectionHeader(parent, text, order)
-    local holder = Instance.new("Frame")
-    holder.Size = UDim2.new(1, 0, 0, 24)
-    holder.BackgroundTransparency = 1
-    holder.LayoutOrder = order
-    holder.Parent = parent
+    local holder = Instance.new("Frame", parent)
+    holder.Size = UDim2.new(1, 0, 0, 24); holder.BackgroundTransparency = 1; holder.LayoutOrder = order
 
-    local dot = Instance.new("Frame")
-    dot.Size = UDim2.new(0, 6, 0, 6)
-    dot.Position = UDim2.new(0, 4, 0.5, -3)
-    dot.BackgroundColor3 = T.accent
-    dot.BorderSizePixel = 0
-    dot.Parent = holder
+    local dot = Instance.new("Frame", holder)
+    dot.Size = UDim2.new(0, 6, 0, 6); dot.Position = UDim2.new(0, 4, 0.5, -3); dot.BackgroundColor3 = T.accent; dot.BorderSizePixel = 0
     Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
 
-    local lbl = Instance.new("TextLabel")
-    lbl.Size = UDim2.new(1, -30, 1, 0)
-    lbl.Position = UDim2.new(0, 18, 0, 0)
-    lbl.BackgroundTransparency = 1
-    lbl.Text = text:upper()
-    lbl.TextColor3 = T.text
-    lbl.TextSize = 11
-    lbl.Font = Enum.Font.GothamBold
-    lbl.TextXAlignment = Enum.TextXAlignment.Left
-    lbl.Parent = holder
+    local lbl = Instance.new("TextLabel", holder)
+    lbl.Size = UDim2.new(1, -30, 1, 0); lbl.Position = UDim2.new(0, 18, 0, 0); lbl.BackgroundTransparency = 1; lbl.Text = text; lbl.TextColor3 = T.text; lbl.TextSize = 11; lbl.Font = Enum.Font.GothamBold; lbl.TextXAlignment = Enum.TextXAlignment.Left
 end
 
 function GUI.makeToggle(parent, name, desc, default, order, callback, settingName)
-    local row = Instance.new("TextButton")
-    row.Size = UDim2.new(1, 0, 0, 48)
-    row.BackgroundColor3 = T.card
-    row.BorderSizePixel = 0
-    row.Text = ""
-    row.AutoButtonColor = false
-    row.LayoutOrder = order
-    row.Parent = parent
+    local row = Instance.new("TextButton", parent)
+    row.Size = UDim2.new(1, 0, 0, 48); row.BackgroundColor3 = T.card; row.BorderSizePixel = 0; row.Text = ""; row.AutoButtonColor = false; row.LayoutOrder = order
     Instance.new("UICorner", row).CornerRadius = UDim.new(0, 10)
     local rowStroke = Instance.new("UIStroke", row); rowStroke.Color = T.stroke; rowStroke.Thickness = 1; rowStroke.Transparency = 0.4; rowStroke.Parent = row
 
@@ -366,8 +313,8 @@ function GUI.makeToggle(parent, name, desc, default, order, callback, settingNam
 end
 
 function GUI.makeSlider(parent, name, min, max, default, order, callback, settingName)
-    local row = Instance.new("Frame")
-    row.Size = UDim2.new(1, 0, 0, 62); row.BackgroundColor3 = T.card; row.BorderSizePixel = 0; row.LayoutOrder = order; row.Parent = parent
+    local row = Instance.new("Frame", parent)
+    row.Size = UDim2.new(1, 0, 0, 62); row.BackgroundColor3 = T.card; row.BorderSizePixel = 0; row.LayoutOrder = order
     Instance.new("UICorner", row).CornerRadius = UDim.new(0, 10)
     local rowStroke = Instance.new("UIStroke", row); rowStroke.Color = T.stroke; rowStroke.Thickness = 1; rowStroke.Transparency = 0.4; rowStroke.Parent = row
 
@@ -407,14 +354,12 @@ function GUI.makeSlider(parent, name, min, max, default, order, callback, settin
     end
 
     local clickArea = Instance.new("TextButton", row)
-    clickArea.Size = UDim2.new(1, 0, 0, 30); clickArea.Position = UDim2.new(0, 0, 0, 26)
-    clickArea.BackgroundTransparency = 1; clickArea.Text = ""
+    clickArea.Size = UDim2.new(1, 0, 0, 30); clickArea.Position = UDim2.new(0, 0, 0, 26); clickArea.BackgroundTransparency = 1; clickArea.Text = ""
     clickArea.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             activeDrag = true; apply(min + ((input.Position.X - track.AbsolutePosition.X) / track.AbsoluteSize.X) * (max - min), false)
         end
     end)
-
     UIS.InputChanged:Connect(function(input)
         if activeDrag and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             apply(min + ((input.Position.X - track.AbsolutePosition.X) / track.AbsoluteSize.X) * (max - min), false)
@@ -437,14 +382,8 @@ function GUI.makeActionButton(parent, text, variant, order, onClick)
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
     local s = Instance.new("UIStroke", btn); s.Color = strokeColor; s.Thickness = 1; s.Parent = btn
 
-    btn.MouseEnter:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = color:Lerp(Color3.fromRGB(255,255,255), variant == "primary" and 0.2 or 0.15)}):Play()
-        TweenService:Create(s, TweenInfo.new(0.15), {Color = T.accent, Transparency = 0.4}):Play()
-    end)
-    btn.MouseLeave:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = color}):Play()
-        TweenService:Create(s, TweenInfo.new(0.15), {Color = strokeColor, Transparency = 0}):Play()
-    end)
+    btn.MouseEnter:Connect(function() TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = color:Lerp(Color3.fromRGB(255,255,255), variant == "primary" and 0.2 or 0.15)}):Play(); TweenService:Create(s, TweenInfo.new(0.15), {Color = T.accent, Transparency = 0.4}):Play() end)
+    btn.MouseLeave:Connect(function() TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = color}):Play(); TweenService:Create(s, TweenInfo.new(0.15), {Color = strokeColor, Transparency = 0}):Play() end)
 
     if onClick then btn.MouseButton1Click:Connect(onClick) end
     return btn
