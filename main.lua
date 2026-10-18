@@ -40,13 +40,13 @@ local function build()
         local card = Instance.new("Frame", statsRow)
         card.Size = UDim2.new(0.5, -4, 1, 0); card.BackgroundColor3 = T.row; card.BorderSizePixel = 0; card.LayoutOrder = order
         Instance.new("UICorner", card).CornerRadius = UDim.new(0, 10)
-        local t = Instance.new("TextLabel", card); t.Size = UDim2.new(1, -20, 0, 12); t.Position = UDim2.new(0, 12, 0, 10); t.BackgroundTransparency = 1; t.Text = title:upper(); t.TextColor3 = T.textMuted; t.TextSize = 9; t.Font = Enum.Font.GothamBold; t.TextXAlignment = Enum.TextXAlignment.Left
+        local t = Instance.new("TextLabel", card); t.Size = UDim2.new(1, -20, 0, 12); t.Position = UDim2.new(0, 12, 0, 10); t.BackgroundTransparency = 1; t.Text = title; t.TextColor3 = T.textMuted; t.TextSize = 9; t.Font = Enum.Font.GothamBold; t.TextXAlignment = Enum.TextXAlignment.Left
         local v = Instance.new("TextLabel", card); v.Size = UDim2.new(1, -20, 0, 20); v.Position = UDim2.new(0, 12, 0, 26); v.BackgroundTransparency = 1; v.Text = "0"; v.TextColor3 = T.text; v.TextSize = 16; v.Font = Enum.Font.GothamBold; v.TextXAlignment = Enum.TextXAlignment.Left
         return v
     end
 
-    local strValue = MakeStat(1, "Strength")
-    local rebValue = MakeStat(2, "Rebirths")
+    local strValue = MakeStat(1, "Strength:")
+    local rebValue = MakeStat(2, "Rebirth:")
 
     task.spawn(function()
         while GUI.screenGui.Parent do
@@ -60,6 +60,12 @@ local function build()
             end
         end
     end)
+
+    GUI.makeSectionHeader(page, "Other", 4)
+    GUI.makeToggle(page, "Watermark", "Показать Watermark на экране", Core.settings.watermark, 5, function(v)
+        Core.settings.watermark = v
+        if Core.Watermark then Core.Watermark.setEnabled(v) end
+    end, "watermark")
 
     tab.Button.MouseButton1Click:Connect(function() GUI.switchTab(tab, page) end)
     return tab, page
