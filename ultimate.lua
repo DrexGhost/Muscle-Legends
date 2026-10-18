@@ -1,5 +1,20 @@
 local Core, GUI = ...
 
+local TRANSLATIONS = {
+    ["Golden Rebirth"] = "Уменьшает стоимость перерождения на 10%",
+    ["Galaxy Gains"] = "Увеличивает получаемую силу",
+    ["Muscle Mind"] = "Увеличивает получаемую силу за повторения",
+    ["Demon Damage"] = "Увеличивает урон по демонам",
+    ["Infernal Health"] = "Увеличивает здоровье",
+    ["Jungle Swift"] = "Увеличивает скорость в джунглях",
+    ["x2 Chest Rewards"] = "Удваивает награды из сундуков",
+    ["x2 Quest Rewards"] = "Удваивает награды за квесты",
+    ["+5% Rep Speed"] = "Ускоряет скорость повторений",
+    ["+1 Pet Slot"] = "Добавляет слот для питомца",
+    ["+10 Item Capacity"] = "Увеличивает вместимость предметов",
+    ["+1 Daily Spin"] = "Добавляет ежедневное вращение"
+}
+
 local function build()
     local tab = GUI.makeTab("Ultimate", 4, "settings")
     local page = GUI.makePage()
@@ -8,7 +23,8 @@ local function build()
 
     local order = 2
     for _, name in ipairs(Core.ABSOLUTE_ORDER) do
-        GUI.makeToggle(page, name, "Автоматически улучшать", Core.settings.ultimates[name], order, function(v)
+        local desc = TRANSLATIONS[name] or "Улучшение"
+        GUI.makeToggle(page, name, desc, Core.settings.ultimates[name], order, function(v)
             Core.settings.ultimates[name] = v
         end, "ult_" .. name:gsub("%s+", ""))
         order = order + 1
