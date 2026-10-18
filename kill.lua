@@ -10,8 +10,9 @@ local lastAttack = 0
 local lastSizeCheck = 0
 local currentBossModel = nil
 local currentBossPart = nil
-local bv = nil
 local lastSearchTime = 0
+local bossWasAlive = false
+local RETURN_POS = Vector3.new(-16.9, 36.3, -1243.5)
 
 local function getBoss()
     local events = workspace:FindFirstChild("Events")
@@ -22,7 +23,9 @@ local function getBoss()
         local part = model:FindFirstChild("Boss")
         if part and part:IsA("BasePart") then
             local hp = model:GetAttribute("Health") or part:GetAttribute("Health") or 100
-            if hp > 0 then return model, part end
+            if hp > 0 and part.Position.Y > 0 then
+                return model, part
+            end
         end
     end
     return nil, nil
@@ -38,7 +41,7 @@ local function disableFarmBoss()
     end
     currentBossModel = nil
     currentBossPart = nil
-    if bv then bv:Destroy(); bv = nil end
+    bossWasAlive = false
     local char = NexusX.Player.Character
     if char then
         local hum = char:FindFirstChildOfClass("Humanoid")
@@ -60,10 +63,12 @@ local farmBossToggleFrame = UI.createToggle(content, "FARM BOSS", 15, Settings.f
         State.searchStartTime = os.clock()
         lastAttack = 0
         lastSearchTime = 0
+        bossWasAlive = false
     else
         Settings.farmBoss = false
         State.searchStartTime = nil
         lastAttack = 0
+        bossWasAlive = false
     end
 end, "farmBoss", true)
 
@@ -87,30 +92,36 @@ RunService.Heartbeat:Connect(function(dt)
     if not hrp or not hum then return end
 
     if currentBossPart then
-        if not currentBossPart.Parent then
+        if not currentBossPart.Parent or currentBossPart.Position.Y <= 0 then
             currentBossModel = nil
             currentBossPart = nil
+            bossWasAlive = false
         else
             local hp = currentBossModel:GetAttribute("Health") or currentBossPart:GetAttribute("Health")
-            if hp and hp <= 0 then
-                currentBossModel = nil
-                currentBossPart = nil
-                if bv then bv.Velocity = Vector3.zero end
+            if hp and hp > 0 then
+                bossWasAlive = true
+            elseif hp and hp <= 0 then
+                if bossWasAlive then
+                    hrp.CFrame = CFrame.new(RETURN_POS)
+                    currentBossModel = nil
+                    currentBossPart = nil
+                    bossWasAlive = false
+                end
             end
         end
     end
 
     if not currentBossPart then
-        if os.clock() - lastSearchTime >= 5 then
+        if os.clock() - lastSearchTime >= 2 then
             lastSearchTime = os.clock()
             local bModel, bPart = getBoss()
             if bModel then
                 currentBossModel = bModel
                 currentBossPart = bPart
+                bossWasAlive = true
             end
         end
         if not currentBossPart then
-            if bv then bv.Velocity = Vector3.zero end
             return
         end
     end
@@ -129,48 +140,16 @@ RunService.Heartbeat:Connect(function(dt)
         if part:IsA("BasePart") then part.CanCollide = false end
     end
     hum.AutoRotate = false
+    hum.PlatformStand = true
 
-    local attackKind = bModel:GetAttribute("BossAttackKind")
-    local targetPos
-
-    if attackKind == "Stomp" then
-        targetPos = bPart.Position + Vector3.new(0, 51, 0)
-    else
-        local look = bPart.CFrame.LookVector
-        local flatLook = Vector3.new(look.X, 0, look.Z)
-        if flatLook.Magnitude < 0.1 then
-            flatLook = Vector3.new(0, 0, -1)
-        else
-            flatLook = flatLook.Unit
-        end
-        targetPos = bPart.Position - (flatLook * 15) + Vector3.new(0, 3, 0)
+    local targetPos = bPart.Position + Vector3.new(0, 51, 0)
+    local lookTarget = bPart.Position
+    
+    if (targetPos - lookTarget).Magnitude < 1 then
+        lookTarget = targetPos + Vector3.new(0, 0, -1)
     end
 
-    local distance = (targetPos - hrp.Position).Magnitude
-
-    if distance > 5 then
-        hum.PlatformStand = true
-        
-        if not bv or not bv.Parent then
-            bv = Instance.new("BodyVelocity")
-            bv.Name = "FarmSpeedBV"
-            bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-            bv.Parent = hrp
-        end
-        
-        local dir = (targetPos - hrp.Position).Unit
-        bv.Velocity = dir * 500
-        hrp.CFrame = CFrame.lookAt(hrp.Position, bPart.Position)
-    else
-        if bv then bv.Velocity = Vector3.zero end
-        hum.PlatformStand = false
-        
-        local lookTarget = bPart.Position
-        if (targetPos - lookTarget).Magnitude < 1 then
-            lookTarget = targetPos + Vector3.new(0, 0, -1)
-        end
-        hrp.CFrame = CFrame.lookAt(targetPos, lookTarget)
-    end
+    hrp.CFrame = CFrame.lookAt(targetPos, lookTarget)
 
     NexusX.createHitbox(bPart)
 
@@ -189,11 +168,13 @@ table.insert(NexusX.Features.OnSettingsLoaded, function()
             State.searchStartTime = os.clock()
             lastAttack = 0
             lastSearchTime = 0
+            bossWasAlive = false
         else
             farmBossToggleBtn.BackgroundColor3 = NexusX.Colors.toggleOff
             if farmBossToggleDot then farmBossToggleDot.Position = UDim2.new(0, 2, 0.5, -8) end
             State.searchStartTime = nil
             lastAttack = 0
+            bossWasAlive = false
         end
     end
 end)
