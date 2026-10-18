@@ -26,19 +26,13 @@ local function build()
     local bNames = {"EXTREME", "HARD", "MEDIUM", "EASY"}
     local order = 5
     for _, bName in ipairs(bNames) do
-        local isActive = (Core.settings.eventBoss == bName)
-        GUI.makeToggle(page, "Select: " .. bName, "Фармить " .. bName, isActive, order, function(v)
-            if v then
-                Core.settings.eventBoss = bName
-                Core.saveSetting("eventBoss", bName)
-                for _, otherName in ipairs(bNames) do
-                    if otherName ~= bName then
-                        local ref = Core.toggleRefs["boss_" .. otherName]
-                        if ref then ref.setEnabled(false, true) end
-                    end
-                end
-            else
-                Core.settings.eventBoss = nil
+        local isActive = Core.settings.eventBosses[bName]
+        GUI.makeToggle(page, bName, "Фармить " .. bName, isActive, order, function(v)
+            Core.settings.eventBosses[bName] = v
+            Core.saveSetting("eventBosses", Core.settings.eventBosses)
+            if v and not Core.settings.autoEventFarm then
+                Core.settings.autoEventFarm = true
+                if Core.toggleRefs["autoEventFarm"] then Core.toggleRefs["autoEventFarm"].setEnabled(true, true) end
             end
         end, "boss_" .. bName)
         order = order + 1
