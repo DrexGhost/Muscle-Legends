@@ -1,5 +1,32 @@
 local Core, GUI = ...
 
+local function refreshAllUI()
+    for name, ref in pairs(Core.toggleRefs) do
+        local val = Core.settings[name]
+        if val ~= nil then
+            ref.setEnabled(val, true)
+        end
+    end
+
+    for name, ref in pairs(Core.sliderRefs) do
+        local val = Core.settings[name]
+        if val ~= nil then
+            ref.setValue(val, true)
+        end
+    end
+
+    GUI.setScale((Core.settings.guiScale or 85) / 100)
+    GUI.setButtonSize(Core.settings.floatBtnSize or Core.BUTTON_DEFAULT_SIZE)
+    
+    if Core.settings.floatBtnPos then
+        GUI.setButtonPos(Core.settings.floatBtnPos)
+    end
+
+    if Core.Watermark then
+        Core.Watermark.setEnabled(Core.settings.watermark or false)
+    end
+end
+
 local function build()
     local tab = GUI.makeTab("Settings", 7, "settings")
     local page = GUI.makePage()
@@ -32,7 +59,11 @@ local function build()
             local lbl = Instance.new("TextLabel", row); lbl.Size = UDim2.new(1, -170, 1, 0); lbl.Position = UDim2.new(0, 14, 0, 0); lbl.BackgroundTransparency = 1; lbl.Text = name; lbl.TextColor3 = Core.T.text; lbl.TextSize = 12; lbl.Font = Enum.Font.GothamBold; lbl.TextXAlignment = Enum.TextXAlignment.Left
             
             local loadBtn = Instance.new("TextButton", row); loadBtn.Size = UDim2.new(0, 70, 0, 26); loadBtn.Position = UDim2.new(1, -152, 0.5, -13); loadBtn.BackgroundColor3 = Core.T.blue; loadBtn.Text = "LOAD"; loadBtn.TextColor3 = Color3.fromRGB(255,255,255); loadBtn.TextSize = 10; loadBtn.Font = Enum.Font.GothamBold
-            loadBtn.MouseButton1Click:Connect(function() if Core.loadConfigFrom(name) then end end)
+            loadBtn.MouseButton1Click:Connect(function() 
+                if Core.loadConfigFrom(name) then 
+                    refreshAllUI()
+                end 
+            end)
             
             local delBtn = Instance.new("TextButton", row); delBtn.Size = UDim2.new(0, 70, 0, 26); delBtn.Position = UDim2.new(1, -74, 0.5, -13); delBtn.BackgroundColor3 = Core.T.danger; delBtn.Text = "DELETE"; delBtn.TextColor3 = Color3.fromRGB(255,255,255); delBtn.TextSize = 10; delBtn.Font = Enum.Font.GothamBold
             delBtn.MouseButton1Click:Connect(function() Core.deleteConfig(name); refreshConfigList() end)
