@@ -49,6 +49,7 @@ Core.settings = {
     autoEventFarm = false,
     eventBoss = "EXTREME",
     ultimates = {},
+    watermark = false,
     guiScale = 85,
     floatBtnSize = 58,
     floatBtnPos = {0, 20, 0.5, 0}
@@ -212,26 +213,50 @@ function Core.getEventBoss()
     return nil
 end
 
-function Core.equipPunch()
+function Core.hasDumbbell()
     local char = LocalPlayer.Character
-    if not char then return nil end
-    local tool = char:FindFirstChildOfClass("Tool")
-    if tool and tool.Name == "Punch" then return tool end
-    local bp = LocalPlayer:FindFirstChild("Backpack")
-    if bp then
-        local punch = bp:FindFirstChild("Punch")
-        if punch then
-            punch.Parent = char
-            task.wait(0.1)
-            return punch
+    if not char then return false end
+    for _, child in pairs(char:GetChildren()) do
+        if child:IsA("Tool") then
+            local n = string.lower(child.Name)
+            if string.find(n, "weight") or string.find(n, "dumbbell") or string.find(n, "barbell") then return true end
         end
     end
-    return nil
+    return false
+end
+
+function Core.equipDumbbell()
+    local bp = LocalPlayer:FindFirstChild("Backpack")
+    if not bp then return end
+    for _, tool in pairs(bp:GetChildren()) do
+        if tool:IsA("Tool") then
+            local n = string.lower(tool.Name)
+            if string.find(n, "weight") or string.find(n, "dumbbell") or string.find(n, "barbell") then
+                tool.Parent = LocalPlayer.Character
+                task.wait(0.1)
+                return
+            end
+        end
+    end
 end
 
 function Core.punch()
-    local tool = Core.equipPunch()
-    if tool then pcall(function() tool:Activate() end) end
+    local char = LocalPlayer.Character
+    if not char then return end
+    local tool = char:FindFirstChildOfClass("Tool")
+    if tool then
+        pcall(function() tool:Activate() end)
+    else
+        local bp = LocalPlayer:FindFirstChild("Backpack")
+        if bp then
+            local p = bp:FindFirstChild("Punch")
+            if p then
+                p.Parent = char
+                task.wait(0.1)
+                pcall(function() p:Activate() end)
+            end
+        end
+    end
 end
 
 function Core.setSize(val)
@@ -261,14 +286,9 @@ function Core.getUltimateLevel(name)
     return typeof(v) == "number" and v or 0
 end
 
-local function getStrength()
-    local stats = LocalPlayer:FindFirstChild("leaderstats")
-    local s = stats and stats:FindFirstChild("Strength")
-    return s and s.Value or 0
-end
-
 function Core.startLoops()
     local lastAttack, lastRebirth, lastUltimate = 0, 0, 0
+    
     RunService.Heartbeat:Connect(function()
         local char = LocalPlayer.Character
         if not char then return end
@@ -292,9 +312,18 @@ function Core.startLoops()
             end
         end
 
-        if Core.settings.autoStrength or Core.settings.autoClicker then
-            Core.punch()
+        if Core.settings.autoStrength then
+            if not Core.hasDumbbell() then Core.equipDumbbell() end
+            if Core.hasDumbbell() then
+                local tool = char:FindFirstChildOfClass("Tool")
+                if tool then pcall(function() tool:Activate() end) end
+            end
             task.wait(0.1)
+        end
+
+        if Core.settings.autoClicker then
+            Core.punch()
+            task.wait(0.01)
         end
 
         if Core.settings.autoRebirth then
