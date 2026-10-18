@@ -53,4 +53,3 @@ loadTab("settings.lua")
 
 pcall(function() GUI.activateFirstTab() end)
 pcall(function() GUI.setOpenState(Core.settings.menuOpen) end)
-pcall(function() Core.startLoops() end)
