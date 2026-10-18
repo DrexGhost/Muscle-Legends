@@ -1,11 +1,11 @@
 local Core, GUI = ...
 
 local function build()
-    local tab = GUI.makeTab("Farm", 3, "crosshair")
+    local tab = GUI.makeTab("Farm", 3, "farm")
     local page = GUI.makePage()
 
     GUI.makeSectionHeader(page, "Boss Farm", 1)
-    GUI.makeToggle(page, "Boss Farm", "Фарм обычных боссов на арене", Core.settings.bossFarm, 2, function(v)
+    GUI.makeToggle(page, "Boss Farm", "Фарм боссов", Core.settings.bossFarm, 2, function(v)
         Core.settings.bossFarm = v
         if not v then
             local char = game.Players.LocalPlayer.Character
