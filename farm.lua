@@ -16,6 +16,11 @@ local function build()
         end
     end, "bossFarm")
 
+    GUI.makeSectionHeader(page, "Chest", 3)
+    GUI.makeToggle(page, "Collect Chest", "Сбор сундуков", Core.settings.collectChest, 4, function(v)
+        Core.settings.collectChest = v
+    end, "collectChest")
+
     tab.Button.MouseButton1Click:Connect(function() GUI.switchTab(tab, page) end)
     return tab, page
 end
