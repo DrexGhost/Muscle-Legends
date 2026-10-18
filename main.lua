@@ -83,14 +83,6 @@ local wmAvatarCorner = Instance.new("UICorner")
 wmAvatarCorner.CornerRadius = UDim.new(1, 0)
 wmAvatarCorner.Parent = wmAvatarFrame
 
-local wmAvatarGrad = Instance.new("UIGradient")
-wmAvatarGrad.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, T.accent),
-    ColorSequenceKeypoint.new(1, T.accentDim),
-})
-wmAvatarGrad.Rotation = 135
-wmAvatarGrad.Parent = wmAvatarFrame
-
 local wmAvatarWrap = Instance.new("Frame")
 wmAvatarWrap.Size = UDim2.new(1, -4, 1, -4)
 wmAvatarWrap.Position = UDim2.new(0.5, -14, 0.5, -14)
