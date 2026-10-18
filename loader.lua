@@ -1,43 +1,56 @@
-local REPO_URL = "https://raw.githubusercontent.com/DrexGhost/Muscle-Legends/main/"
-local FILES = {
-    "core",
-    "gui",
-    "main",
-    "auto",
-    "teleport",
-    "movement",
-    "kill",
-    "event",
-    "ultimate",
-    "other"
-}
+local base = "https://raw.githubusercontent.com/DrexGhost/Muscle-Legends/main/"
 
-local function loadScript(file)
-    local url = REPO_URL .. file .. ".lua"
-    
-    -- Добавляем рандомный параметр, чтобы GitHub не кэшировал старую версию
-    local antiCacheUrl = url .. "?t=" .. tostring(tick())
-    
-    local success, code = pcall(function()
-        return game:HttpGet(antiCacheUrl)
+local function fetch(name)
+    local url = base .. name
+    local ok, code = pcall(function()
+        return game:HttpGet(url)
     end)
-    
-    if success and code and code ~= "" then
-        local func, err = loadstring(code)
-        if func then
-            pcall(func)
-            print("[NexusX] Успешно загружен: " .. file .. ".lua")
-        else
-            warn("[NexusX] Ошибка синтаксиса в " .. file .. ".lua: " .. tostring(err))
-        end
-    else
-        warn("[NexusX] Не удалось скачать: " .. file .. ".lua")
-    end
-    task.wait(0.1)
+    if not ok then return nil end
+    return code
 end
 
-print("[NexusX] Запуск...")
-for _, file in ipairs(FILES) do
-    loadScript(file)
+local function compile(name, code)
+    if not code then return nil end
+    local fn, err = loadstring(code)
+    if not fn then return nil end
+    return fn
 end
-print("[NexusX] Загрузка завершена!")
+
+local function run(name, fn, ...)
+    if not fn then return nil end
+    local ok, result = pcall(fn, ...)
+    if not ok then return nil end
+    return result
+end
+
+local Core = run("core.lua", compile("core.lua", fetch("core.lua")))
+if not Core then return end
+
+Core.loadSettings()
+
+local GUI = run("gui.lua", compile("gui.lua", fetch("gui.lua")), Core)
+if not GUI then return end
+
+local function loadTab(name)
+    local code = fetch(name)
+    if not code then return end
+    local fn = compile(name, code)
+    if not fn then return end
+    local ok, build = pcall(fn, Core, GUI)
+    if not ok then return end
+    if type(build) == "function" then
+        pcall(build)
+    end
+end
+
+loadTab("main.lua")
+loadTab("helper.lua")
+loadTab("farm.lua")
+loadTab("ultimate.lua")
+loadTab("movement.lua")
+loadTab("event.lua")
+loadTab("settings.lua")
+
+pcall(function() GUI.activateFirstTab() end)
+pcall(function() GUI.setOpenState(Core.settings.menuOpen) end)
+pcall(function() Core.startLoops() end)
