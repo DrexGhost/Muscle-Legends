@@ -7,9 +7,61 @@ local function build()
 
     GUI.makeSectionHeader(page, "Automation", 1)
     
-    GUI.makeToggle(page, "Auto Strength", "Автоматически качает силу", Core.settings.autoStrength, 2, function(v) Core.settings.autoStrength = v end, "autoStrength")
-    GUI.makeToggle(page, "Auto Rebirth", "Автоматическое перерождение", Core.settings.autoRebirth, 3, function(v) Core.settings.autoRebirth = v end, "autoRebirth")
-    GUI.makeToggle(page, "Auto Clicker", "Автоматические клики", Core.settings.autoClicker, 4, function(v) Core.settings.autoClicker = v end, "autoClicker")
+    local autoStrThread, autoRebThread, autoClickThread
+
+    local function startAutoStr()
+        if autoStrThread then task.cancel(autoStrThread) end
+        autoStrThread = task.spawn(function()
+            while Core.settings.autoStrength do
+                if not Core.hasDumbbell() then Core.equipDumbbell() end
+                if Core.hasDumbbell() then
+                    local char = LocalPlayer.Character
+                    local tool = char and char:FindFirstChildOfClass("Tool")
+                    if tool then pcall(function() tool:Activate() end) end
+                end
+                task.wait(0.15)
+            end
+        end)
+    end
+
+    local function startAutoReb()
+        if autoRebThread then task.cancel(autoRebThread) end
+        autoRebThread = task.spawn(function()
+            while Core.settings.autoRebirth do
+                Core.doRebirth()
+                task.wait(2)
+            end
+        end)
+    end
+
+    local function startAutoClick()
+        if autoClickThread then task.cancel(autoClickThread) end
+        autoClickThread = task.spawn(function()
+            while Core.settings.autoClicker do
+                Core.doClicker()
+                task.wait(0.05)
+            end
+        end)
+    end
+
+    GUI.makeToggle(page, "Auto Strength", "Автоматически качает силу", Core.settings.autoStrength, 2, function(v) 
+        Core.settings.autoStrength = v
+        if v then startAutoStr() else if autoStrThread then task.cancel(autoStrThread) end end
+    end, "autoStrength")
+
+    GUI.makeToggle(page, "Auto Rebirth", "Автоматическое перерождение", Core.settings.autoRebirth, 3, function(v) 
+        Core.settings.autoRebirth = v
+        if v then startAutoReb() else if autoRebThread then task.cancel(autoRebThread) end end
+    end, "autoRebirth")
+
+    GUI.makeToggle(page, "Auto Clicker", "Автоматические клики", Core.settings.autoClicker, 4, function(v) 
+        Core.settings.autoClicker = v
+        if v then startAutoClick() else if autoClickThread then task.cancel(autoClickThread) end end
+    end, "autoClicker")
+
+    if Core.settings.autoStrength then startAutoStr() end
+    if Core.settings.autoRebirth then startAutoReb() end
+    if Core.settings.autoClicker then startAutoClick() end
 
     GUI.makeSectionHeader(page, "Teleport", 5)
     
