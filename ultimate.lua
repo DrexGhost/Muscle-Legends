@@ -1,4 +1,5 @@
 local Core, GUI = ...
+local RunService = game:GetService("RunService")
 
 local TRANSLATIONS = {
     ["Golden Rebirth"] = "Уменьшает стоимость перерождения на 10%",
@@ -29,6 +30,24 @@ local function build()
         end, "ult_" .. name:gsub("%s+", ""))
         order = order + 1
     end
+
+    local lastUltimate = 0
+    RunService.Heartbeat:Connect(function()
+        local now = os.clock()
+        if now - lastUltimate > 2 then
+            lastUltimate = now
+            for _, name in ipairs(Core.ABSOLUTE_ORDER) do
+                if Core.settings.ultimates[name] then
+                    local lvl = Core.getUltimateLevel(name)
+                    local max = Core.ABSOLUTE_MAX["Ultimate" .. name:gsub("%s+", "")] or 5
+                    if lvl < max then
+                        Core.upgradeUltimate(name)
+                        break
+                    end
+                end
+            end
+        end
+    end)
 
     tab.Button.MouseButton1Click:Connect(function() GUI.switchTab(tab, page) end)
     return tab, page
