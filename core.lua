@@ -1,288 +1,344 @@
-local NexusX = {}
-_G.NexusX = NexusX
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local HttpService = game:GetService("HttpService")
+local RS = game:GetService("ReplicatedStorage")
 
-NexusX.Player = game:GetService("Players").LocalPlayer
-NexusX.UIS = game:GetService("UserInputService")
-NexusX.RunService = game:GetService("RunService")
-NexusX.TweenService = game:GetService("TweenService")
-NexusX.ReplicatedStorage = game:GetService("ReplicatedStorage")
-NexusX.HttpService = game:GetService("HttpService")
-NexusX.VIM = game:GetService("VirtualInputManager")
+local LocalPlayer = Players.LocalPlayer
+local rEvents = RS:FindFirstChild("rEvents")
 
-NexusX.rEvents = NexusX.ReplicatedStorage:FindFirstChild("rEvents")
-NexusX.Threads = {}
-NexusX.Features = { OnSettingsLoaded = {} }
-NexusX.UI = {}
-NexusX.State = { searchStartTime = nil, lastAttack = 0 }
+local Core = {}
 
-NexusX.CONFIG_FILE = "NexusXMuscle_Legends.json"
+Core.CONFIG_FILE = "NexusXMuscle_Legends.json"
+Core.CONFIG_FOLDER = "MuscleLegendsConfigs"
 
-function NexusX.startThread(key, fn)
-    if NexusX.Threads[key] then
-        task.cancel(NexusX.Threads[key])
-        NexusX.Threads[key] = nil
-    end
-    NexusX.Threads[key] = task.spawn(fn)
-end
-
-function NexusX.stopThread(key)
-    if NexusX.Threads[key] then
-        task.cancel(NexusX.Threads[key])
-        NexusX.Threads[key] = nil
-    end
-end
-
-NexusX.Colors = {
-    bg = Color3.fromRGB(10, 10, 10),
-    accent = Color3.fromRGB(20, 20, 20),
-    button = Color3.fromRGB(25, 25, 25),
-    buttonHover = Color3.fromRGB(35, 35, 35),
-    text = Color3.fromRGB(210, 210, 210),
-    toggleOn = Color3.fromRGB(60, 120, 60),
-    toggleOff = Color3.fromRGB(50, 50, 50),
+Core.T = {
+    bg1 = Color3.fromRGB(14, 18, 32),
+    bg2 = Color3.fromRGB(6, 9, 18),
+    panel = Color3.fromRGB(20, 26, 44),
+    panelHi = Color3.fromRGB(30, 38, 62),
+    card = Color3.fromRGB(24, 30, 50),
+    cardHover = Color3.fromRGB(34, 42, 68),
+    row = Color3.fromRGB(26, 32, 52),
+    accent = Color3.fromRGB(0, 229, 204),
+    accentDim = Color3.fromRGB(0, 140, 128),
+    accentSoft = Color3.fromRGB(140, 250, 235),
+    text = Color3.fromRGB(232, 238, 248),
+    textDim = Color3.fromRGB(150, 162, 190),
+    textMuted = Color3.fromRGB(90, 102, 130),
+    stroke = Color3.fromRGB(44, 54, 86),
+    success = Color3.fromRGB(80, 230, 140),
+    warn = Color3.fromRGB(255, 200, 80),
+    danger = Color3.fromRGB(255, 90, 110),
+    toggleOff = Color3.fromRGB(48, 58, 88),
+    online = Color3.fromRGB(80, 230, 140),
+    blue = Color3.fromRGB(70, 130, 220),
+    blueHi = Color3.fromRGB(90, 150, 240),
 }
 
-NexusX.CHESTS = {
-    { name = "Golden", coords = Vector3.new(-139, 7, -275) },
-    { name = "Enchanted", coords = Vector3.new(-2569, 7, -556) },
-    { name = "Mythical", coords = Vector3.new(2208, 7, 912) },
-    { name = "Magma", coords = Vector3.new(-6714, 7, -1459) },
-    { name = "Legends", coords = Vector3.new(4667, 1000, -3694) },
-    { name = "Jungle", coords = Vector3.new(-7915, 41, 3026) },
-    { name = "Industrial", coords = Vector3.new(-4757, 99, 5580) },
-    { name = "Overcharged", coords = Vector3.new(-2297, 195, 5506) },
+Core.settings = {
+    menuOpen = true,
+    autoStrength = false,
+    autoRebirth = false,
+    autoClicker = false,
+    bossFarm = false,
+    noclip = false,
+    speed = false,
+    walkSpeed = 50,
+    size = false,
+    sizeValue = 2,
+    autoEventFarm = false,
+    eventBoss = "EXTREME",
+    ultimates = {},
+    guiScale = 85,
+    floatBtnSize = 58,
+    floatBtnPos = {0, 20, 0.5, 0}
 }
 
-NexusX.EVENT_BOSSES = {
-    EASY = { modelName = "Scarecrow Colossus", partName = "Cube.004", color = Color3.fromRGB(100, 255, 100) },
-    MEDIUM = { modelName = "Pumpkin Titan", partName = "Mesh.001", color = Color3.fromRGB(255, 255, 100) },
-    HARD = { modelName = "Frankenbrute", partName = "BODY", color = Color3.fromRGB(255, 150, 50) },
-    EXTREME = { modelName = "Grim Reaper", partName = "Body0021", color = Color3.fromRGB(180, 100, 255) }
-}
-NexusX.EVENT_BOSS_ORDER = {"EXTREME", "HARD", "MEDIUM", "EASY"}
-
-NexusX.ABSOLUTE_ORDER = {
+Core.ABSOLUTE_ORDER = {
     "Golden Rebirth", "Galaxy Gains", "Muscle Mind", "Demon Damage",
     "Infernal Health", "Jungle Swift", "x2 Chest Rewards", "x2 Quest Rewards",
     "+5% Rep Speed", "+1 Pet Slot", "+10 Item Capacity", "+1 Daily Spin",
 }
 
-NexusX.ABSOLUTE_MAX = {
+Core.ABSOLUTE_MAX = {
     UltimateGoldenRebirth = 5, UltimatePetSlot = 3, UltimateMuscleMind = 5,
     UltimateDemonDamage = 5, UltimateRepSpeed = 10, UltimateInfernalHealth = 5,
     UltimateChestRewards = 5, UltimateJungleSwift = 5, UltimateItemCapacity = 6,
     UltimateQuestRewards = 3, UltimateGalaxyGains = 5, UltimateDailySpin = 5,
 }
 
-pcall(function()
-    NexusX.UltimateAttributes = require(NexusX.ReplicatedStorage.shared.config.UltimateAttributes)
-end)
-
-NexusX.Settings = {
-    menuOpen = true, fps = false, antiAfk = true, autoFull = false,
-    autoLifting = false, autoRebirth = false, autoSize = false, autoClicker = false,
-    autoCollect = false, noclip = false, farmBoss = false, autoFarmBoss = false,
-    speed = false, speedValue = 50, autoAbsolute = false,
-    fpsPos = {0, 10, 0, 10}, openBtnPos = {0.5, -19, 0.5, -19},
-    menuPos = {0.5, -300, 0.5, -150}, openBtnSize = 38,
-    selectedBosses = {EASY = false, MEDIUM = false, HARD = false, EXTREME = false},
-    selectedUltimates = {}, autoFullSize = true, autoFullRebirth = true,
-    autoFullTeleport = true, autoFullLifting = true
-}
-
-for _, name in ipairs(NexusX.ABSOLUTE_ORDER) do
-    NexusX.Settings.selectedUltimates[name] = false
+for _, name in ipairs(Core.ABSOLUTE_ORDER) do
+    Core.settings.ultimates[name] = false
 end
 
-function NexusX.hasFileSupport()
-    return type(writefile) == "function" and type(readfile) == "function" and type(isfile) == "function"
-end
+Core.toggleRefs = {}
+Core.sliderRefs = {}
+Core.partBtnRefs = {}
 
-function NexusX.loadSettings()
-    if not NexusX.hasFileSupport() then return end
-    if not isfile(NexusX.CONFIG_FILE) then return end
-    local success, data = pcall(function()
-        return NexusX.HttpService:JSONDecode(readfile(NexusX.CONFIG_FILE))
+function Core.loadSettings()
+    local success, result = pcall(function()
+        if not LocalPlayer:FindFirstChild("MLSettings") then
+            local ds = Instance.new("Folder")
+            ds.Name = "MLSettings"
+            ds.Parent = LocalPlayer
+        end
+        return LocalPlayer.MLSettings
     end)
-    if success and data then
-        for k, v in pairs(data) do
-            if NexusX.Settings[k] ~= nil and k ~= "menuOpen" then
-                if (k == "selectedBosses" or k == "selectedUltimates") and type(v) == "table" then
-                    for bk, bv in pairs(v) do NexusX.Settings[k][bk] = bv end
-                else
-                    NexusX.Settings[k] = v
+    if success and result then
+        Core.dataStore = result
+        for name, defaultValue in pairs(Core.settings) do
+            local stored = Core.dataStore:FindFirstChild(name)
+            if stored then
+                if stored:GetAttribute("dataType") == "table" and stored:IsA("StringValue") then
+                    local ok, decoded = pcall(function() return HttpService:JSONDecode(stored.Value) end)
+                    if ok then Core.settings[name] = decoded end
+                elseif type(defaultValue) == type(stored.Value) then
+                    Core.settings[name] = stored.Value
                 end
             end
         end
     end
 end
 
-function NexusX.saveConfigToFile()
-    if not NexusX.hasFileSupport() then return false end
+function Core.saveSetting(name, value)
+    Core.settings[name] = value
+    if not Core.dataStore then return end
+    local stored = Core.dataStore:FindFirstChild(name)
+    local dataType
+    if type(value) == "table" then dataType = "table"
+    elseif typeof(value) == "string" then dataType = "string"
+    elseif typeof(value) == "number" then dataType = "number"
+    else dataType = "bool" end
+
+    if stored and stored:GetAttribute("dataType") ~= dataType then
+        stored:Destroy()
+        stored = nil
+    end
+    if not stored then
+        if dataType == "table" then
+            stored = Instance.new("StringValue")
+            stored:SetAttribute("dataType", "table")
+        elseif dataType == "string" then stored = Instance.new("StringValue")
+        elseif dataType == "number" then stored = Instance.new("NumberValue")
+        else stored = Instance.new("BoolValue") end
+        stored.Name = name
+        stored.Parent = Core.dataStore
+    end
+    if dataType == "table" then stored.Value = HttpService:JSONEncode(value)
+    else stored.Value = value end
+end
+
+function Core.ensureFolder()
+    if not isfolder or not makefolder then return false end
+    pcall(function() if not isfolder(Core.CONFIG_FOLDER) then makefolder(Core.CONFIG_FOLDER) end end)
+    return true
+end
+
+function Core.listConfigs()
+    if not isfolder or not listfiles then return {} end
+    Core.ensureFolder()
+    local result = {}
+    local ok, files = pcall(function() return listfiles(Core.CONFIG_FOLDER) end)
+    if not ok or type(files) ~= "table" then return result end
+    for _, filePath in ipairs(files) do
+        local fileName = tostring(filePath):match("([^/\\]+)$") or tostring(filePath)
+        local n = fileName:match("^(.+)%.json$")
+        if n then table.insert(result, n) end
+    end
+    table.sort(result)
+    return result
+end
+
+function Core.saveConfigAs(name)
+    Core.ensureFolder()
     local data = {}
-    for k, v in pairs(NexusX.Settings) do
-        if k ~= "menuOpen" then data[k] = v end
-    end
-    local ok = pcall(function()
-        writefile(NexusX.CONFIG_FILE, NexusX.HttpService:JSONEncode(data))
-    end)
-    return ok
+    for k, v in pairs(Core.settings) do data[k] = v end
+    local ok, encoded = pcall(function() return HttpService:JSONEncode(data) end)
+    if not ok then return false end
+    local path = Core.CONFIG_FOLDER .. "/" .. name .. ".json"
+    return pcall(function() writefile(path, encoded) end)
 end
 
-function NexusX.saveSetting(name, value)
-    NexusX.Settings[name] = value
-end
-
-NexusX.loadSettings()
-
-function NexusX.getStrength()
-    local stats = NexusX.Player:FindFirstChild("leaderstats")
-    if stats then local s = stats:FindFirstChild("Strength"); if s then return s.Value end end
-    return 0
-end
-
-function NexusX.getRebirths()
-    local stats = NexusX.Player:FindFirstChild("leaderstats")
-    if stats then local r = stats:FindFirstChild("Rebirths"); if r then return r.Value end end
-    return 0
-end
-
-function NexusX.formatNumber(n)
-    if n >= 1e9 then return string.format("%.2fB", n / 1e9) end
-    if n >= 1e6 then return string.format("%.2fM", n / 1e6) end
-    if n >= 1e3 then return string.format("%.1fK", n / 1e3) end
-    return tostring(n)
-end
-
-function NexusX.getUltimateLevel(attrName)
-    local v = NexusX.Player:GetAttribute(attrName)
-    if typeof(v) == "number" then return v end
-    return 0
-end
-
-function NexusX.getUltimateAttr(displayName)
-    if NexusX.UltimateAttributes and NexusX.UltimateAttributes[displayName] then
-        return NexusX.UltimateAttributes[displayName]
-    end
-    return nil
-end
-
-function NexusX.hasDumbbell()
-    local char = NexusX.Player.Character
-    if not char then return false end
-    for _, child in pairs(char:GetChildren()) do
-        if child:IsA("Tool") then
-            local n = string.lower(child.Name)
-            if string.find(n, "weight") or string.find(n, "dumbbell") or string.find(n, "barbell") then return true end
+function Core.loadConfigFrom(name)
+    local path = Core.CONFIG_FOLDER .. "/" .. name .. ".json"
+    if not isfile(path) then return false end
+    local ok, contents = pcall(function() return readfile(path) end)
+    if not ok then return false end
+    local ok2, decoded = pcall(function() return HttpService:JSONDecode(contents) end)
+    if not ok2 or type(decoded) ~= "table" then return false end
+    for k, v in pairs(decoded) do
+        if Core.settings[k] ~= nil and type(Core.settings[k]) == type(v) then
+            Core.settings[k] = v
+            Core.saveSetting(k, v)
         end
     end
-    return false
+    return true
 end
 
-function NexusX.equipDumbbell()
-    local backpack = NexusX.Player:FindFirstChild("Backpack")
-    if not backpack then return false end
-    for _, tool in pairs(backpack:GetChildren()) do
-        if tool:IsA("Tool") then
-            local n = string.lower(tool.Name)
-            if string.find(n, "weight") or string.find(n, "dumbbell") or string.find(n, "barbell") then
-                local ok = pcall(function() tool.Parent = NexusX.Player.Character end)
-                return ok
+function Core.deleteConfig(name)
+    local path = Core.CONFIG_FOLDER .. "/" .. name .. ".json"
+    return pcall(function() delfile(path) end)
+end
+
+function Core.getBoss()
+    local events = workspace:FindFirstChild("Events")
+    local arena = events and events:FindFirstChild("BossArena")
+    if not arena then return nil end
+    for _, model in ipairs(arena:GetChildren()) do
+        local part = model:FindFirstChild("Boss")
+        if part and part:IsA("BasePart") then
+            local hp = model:GetAttribute("Health") or part:GetAttribute("Health") or 100
+            if hp > 0 and part.Position.Y > 0 then
+                return model, part
             end
         end
     end
-    return false
+    return nil
 end
 
-function NexusX.equipPunch()
-    local myChar = NexusX.Player.Character
-    if not myChar then return nil end
-    local tool = myChar:FindFirstChildOfClass("Tool")
-    if tool then return tool end
-    local backpack = NexusX.Player:FindFirstChild("Backpack")
-    if not backpack then return nil end
-    local punch = backpack:FindFirstChild("Punch")
-    if punch and punch:IsA("Tool") then
-        local ok = pcall(function() punch.Parent = myChar end)
-        if ok then return punch end
+function Core.getEventBoss()
+    local bosses = {
+        EXTREME = { model = "Grim Reaper", part = "Body0021" },
+        HARD = { model = "Frankenbrute", part = "BODY" },
+        MEDIUM = { model = "Pumpkin Titan", part = "Mesh.001" },
+        EASY = { model = "Scarecrow Colossus", part = "Cube.004" }
+    }
+    local b = bosses[Core.settings.eventBoss]
+    if not b then return nil end
+    local model = workspace:FindFirstChild(b.model)
+    if not model then return nil end
+    local part = model:FindFirstChild(b.part)
+    if part and part.Position.Y > 0 then return model, part end
+    return nil
+end
+
+function Core.equipPunch()
+    local char = LocalPlayer.Character
+    if not char then return nil end
+    local tool = char:FindFirstChildOfClass("Tool")
+    if tool and tool.Name == "Punch" then return tool end
+    local bp = LocalPlayer:FindFirstChild("Backpack")
+    if bp then
+        local punch = bp:FindFirstChild("Punch")
+        if punch then
+            punch.Parent = char
+            task.wait(0.1)
+            return punch
+        end
     end
     return nil
 end
 
-function NexusX.activateTool()
-    if not NexusX.Player.Character then return end
-    local tool = NexusX.Player.Character:FindFirstChildOfClass("Tool")
+function Core.punch()
+    local tool = Core.equipPunch()
     if tool then pcall(function() tool:Activate() end) end
 end
 
-function NexusX.doClicker()
-    NexusX.VIM:SendMouseButtonEvent(0, 0, 0, true, game, 0)
-    task.wait(0.02)
-    NexusX.VIM:SendMouseButtonEvent(0, 0, 0, false, game, 0)
+function Core.setSize(val)
+    if rEvents then
+        local csr = rEvents:FindFirstChild("changeSpeedSizeRemote")
+        if csr then pcall(function() csr:InvokeServer("changeSize", val) end) end
+    end
 end
 
-function NexusX.setSize(scale)
-    if not NexusX.rEvents then return end
-    local csr = NexusX.rEvents:FindFirstChild("changeSpeedSizeRemote")
-    if csr then pcall(function() csr:InvokeServer("changeSize", scale) end) end
+function Core.doRebirth()
+    if rEvents then
+        local rr = rEvents:FindFirstChild("rebirthRemote")
+        if rr then pcall(function() rr:InvokeServer("rebirthRequest") end) end
+    end
 end
 
-function NexusX.getRandomHitboxName()
-    local chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    local name = "_"
-    for i = 1, 8 do
-        local idx = math.random(1, #chars)
-        name = name .. chars:sub(idx, idx)
+function Core.upgradeUltimate(name)
+    if rEvents then
+        local ur = rEvents:FindFirstChild("ultimatesRemote")
+        if ur then pcall(function() ur:InvokeServer("upgradeUltimate", name) end) end
     end
-    return name
 end
 
-local hitboxCache = {}
-function NexusX.clearHitboxes()
-    for parent, hitbox in pairs(hitboxCache) do
-        if hitbox and hitbox.Parent then hitbox:Destroy() end
-    end
-    hitboxCache = {}
+function Core.getUltimateLevel(name)
+    local attr = "Ultimate" .. name:gsub("%s+", "")
+    local v = LocalPlayer:GetAttribute(attr)
+    return typeof(v) == "number" and v or 0
 end
 
-function NexusX.createHitbox(bossPart)
-    if not bossPart or not bossPart.Parent then return end
-    local parent = bossPart.Parent
-    local cached = hitboxCache[parent]
-    if cached and cached.Parent then
-        cached.Size = Vector3.new(35, 35, 35)
-        cached.CFrame = bossPart.CFrame
-        return
-    end
-    for _, obj in ipairs(parent:GetChildren()) do
-        if obj.Name:sub(1, 10) == "ML_Hitbox_" then obj:Destroy() end
-    end
-    local hitbox = Instance.new("Part")
-    hitbox.Name = "ML_Hitbox_" .. NexusX.getRandomHitboxName()
-    hitbox.Size = Vector3.new(35, 35, 35)
-    hitbox.Transparency = 1
-    hitbox.CanCollide = false
-    hitbox.Anchored = false
-    hitbox.Massless = true
-    hitbox.CFrame = bossPart.CFrame
-    hitbox.Parent = parent
-    local weld = Instance.new("WeldConstraint")
-    weld.Part0 = hitbox
-    weld.Part1 = bossPart
-    weld.Parent = hitbox
-    hitboxCache[parent] = hitbox
+local function getStrength()
+    local stats = LocalPlayer:FindFirstChild("leaderstats")
+    local s = stats and stats:FindFirstChild("Strength")
+    return s and s.Value or 0
 end
 
-function NexusX.punch()
-    local myChar = NexusX.Player.Character
-    if not myChar then return end
-    local tool = myChar:FindFirstChildOfClass("Tool")
-    if tool then
-        pcall(function() tool:Activate() end)
-        return
-    end
-    task.spawn(function()
-        local punchTool = NexusX.equipPunch()
-        if punchTool then pcall(function() punchTool:Activate() end) end
+function Core.startLoops()
+    local lastAttack, lastRebirth, lastUltimate = 0, 0, 0
+    RunService.Heartbeat:Connect(function()
+        local char = LocalPlayer.Character
+        if not char then return end
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if not hrp or not hum then return end
+
+        if Core.settings.noclip then
+            for _, p in ipairs(char:GetDescendants()) do
+                if p:IsA("BasePart") then p.CanCollide = false end
+            end
+        end
+
+        if Core.settings.speed then
+            if hum.WalkSpeed ~= Core.settings.walkSpeed then hum.WalkSpeed = Core.settings.walkSpeed end
+        end
+
+        if Core.settings.size then
+            if math.abs((hrp.Size.X / 2) - Core.settings.sizeValue) > 0.1 then
+                Core.setSize(Core.settings.sizeValue)
+            end
+        end
+
+        if Core.settings.autoStrength or Core.settings.autoClicker then
+            Core.punch()
+            task.wait(0.1)
+        end
+
+        if Core.settings.autoRebirth then
+            if os.clock() - lastRebirth > 2 then
+                lastRebirth = os.clock()
+                Core.doRebirth()
+            end
+        end
+
+        local targetBoss = nil
+        if Core.settings.bossFarm then targetBoss = Core.getBoss() end
+        if Core.settings.autoEventFarm then targetBoss = Core.getEventBoss() end
+
+        if targetBoss then
+            local part = targetBoss:FindFirstChild("Boss") or targetBoss:FindFirstChildWhichIsA("BasePart")
+            if part then
+                hum.PlatformStand = true
+                hrp.CFrame = CFrame.lookAt(part.Position + Vector3.new(0, 51, 0), part.Position)
+                local now = os.clock()
+                if now - lastAttack > 0.4 then
+                    lastAttack = now
+                    Core.punch()
+                end
+            end
+        else
+            if Core.settings.bossFarm or Core.settings.autoEventFarm then
+                hum.PlatformStand = false
+            end
+        end
+
+        if os.clock() - lastUltimate > 2 then
+            lastUltimate = os.clock()
+            for _, name in ipairs(Core.ABSOLUTE_ORDER) do
+                if Core.settings.ultimates[name] then
+                    local lvl = Core.getUltimateLevel(name)
+                    local max = 5
+                    if lvl < max then
+                        Core.upgradeUltimate(name)
+                        break
+                    end
+                end
+            end
+        end
     end)
 end
+
+return Core
