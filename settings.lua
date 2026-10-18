@@ -3,27 +3,18 @@ local Core, GUI = ...
 local function refreshAllUI()
     for name, ref in pairs(Core.toggleRefs) do
         local val = Core.settings[name]
-        if val ~= nil then
-            ref.setEnabled(val, true)
-        end
+        if val ~= nil then ref.setEnabled(val, true) end
     end
-
     for name, ref in pairs(Core.sliderRefs) do
         local val = Core.settings[name]
-        if val ~= nil then
-            ref.setValue(val, true)
-        end
+        if val ~= nil then ref.setValue(val, true) end
     end
-
     GUI.setScale((Core.settings.guiScale or 85) / 100)
     GUI.setButtonSize(Core.settings.floatBtnSize or Core.BUTTON_DEFAULT_SIZE)
-    
-    if Core.settings.floatBtnPos then
-        GUI.setButtonPos(Core.settings.floatBtnPos)
-    end
-
+    if Core.settings.floatBtnPos then GUI.setButtonPos(Core.settings.floatBtnPos) end
     if Core.Watermark then
         Core.Watermark.setEnabled(Core.settings.watermark or false)
+        Core.Watermark.setScale((Core.settings.watermarkScale or 100) / 100)
     end
 end
 
@@ -58,14 +49,18 @@ local function build()
             
             local lbl = Instance.new("TextLabel", row); lbl.Size = UDim2.new(1, -170, 1, 0); lbl.Position = UDim2.new(0, 14, 0, 0); lbl.BackgroundTransparency = 1; lbl.Text = name; lbl.TextColor3 = Core.T.text; lbl.TextSize = 12; lbl.Font = Enum.Font.GothamBold; lbl.TextXAlignment = Enum.TextXAlignment.Left
             
-            local loadBtn = Instance.new("TextButton", row); loadBtn.Size = UDim2.new(0, 70, 0, 26); loadBtn.Position = UDim2.new(1, -152, 0.5, -13); loadBtn.BackgroundColor3 = Core.T.blue; loadBtn.Text = "LOAD"; loadBtn.TextColor3 = Color3.fromRGB(255,255,255); loadBtn.TextSize = 10; loadBtn.Font = Enum.Font.GothamBold
+            local loadBtn = Instance.new("TextButton", row); loadBtn.Size = UDim2.new(0, 70, 0, 26); loadBtn.Position = UDim2.new(1, -152, 0.5, -13); loadBtn.BackgroundColor3 = Core.T.blue; loadBtn.Text = "LOAD"; loadBtn.TextColor3 = Color3.fromRGB(255,255,255); loadBtn.TextSize = 10; loadBtn.Font = Enum.Font.GothamBold; loadBtn.AutoButtonColor = false
+            Instance.new("UICorner", loadBtn).CornerRadius = UDim.new(0, 7)
+            local loadStroke = Instance.new("UIStroke", loadBtn); loadStroke.Color = Core.T.blueHi; loadStroke.Thickness = 1; loadStroke.Parent = loadBtn
+            
             loadBtn.MouseButton1Click:Connect(function() 
-                if Core.loadConfigFrom(name) then 
-                    refreshAllUI()
-                end 
+                if Core.loadConfigFrom(name) then refreshAllUI() end 
             end)
             
-            local delBtn = Instance.new("TextButton", row); delBtn.Size = UDim2.new(0, 70, 0, 26); delBtn.Position = UDim2.new(1, -74, 0.5, -13); delBtn.BackgroundColor3 = Core.T.danger; delBtn.Text = "DELETE"; delBtn.TextColor3 = Color3.fromRGB(255,255,255); delBtn.TextSize = 10; delBtn.Font = Enum.Font.GothamBold
+            local delBtn = Instance.new("TextButton", row); delBtn.Size = UDim2.new(0, 70, 0, 26); delBtn.Position = UDim2.new(1, -74, 0.5, -13); delBtn.BackgroundColor3 = Core.T.danger; delBtn.Text = "DELETE"; delBtn.TextColor3 = Color3.fromRGB(255,255,255); delBtn.TextSize = 10; delBtn.Font = Enum.Font.GothamBold; delBtn.AutoButtonColor = false
+            Instance.new("UICorner", delBtn).CornerRadius = UDim.new(0, 7)
+            local delStroke = Instance.new("UIStroke", delBtn); delStroke.Color = Core.T.danger; delStroke.Thickness = 1; delStroke.Parent = delBtn
+            
             delBtn.MouseButton1Click:Connect(function() Core.deleteConfig(name); refreshConfigList() end)
         end
     end
@@ -78,6 +73,11 @@ local function build()
     GUI.makeSectionHeader(page, "Appearance", 4)
     GUI.makeSlider(page, "GUI Scale (%)", 70, 95, Core.settings.guiScale, 5, function(v) Core.settings.guiScale = v; GUI.setScale(v / 100) end, "guiScale")
     GUI.makeSlider(page, "Button Size", 40, 80, Core.settings.floatBtnSize, 6, function(v) Core.settings.floatBtnSize = v; GUI.setButtonSize(v) end, "floatBtnSize")
+    
+    GUI.makeSlider(page, "Watermark Scale (%)", 60, 150, Core.settings.watermarkScale or 100, 7, function(v)
+        Core.settings.watermarkScale = v
+        if Core.Watermark then Core.Watermark.setScale(v / 100) end
+    end, "watermarkScale")
 
     tab.Button.MouseButton1Click:Connect(function() GUI.switchTab(tab, page) end)
     return tab, page
