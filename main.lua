@@ -25,6 +25,7 @@ wmRoot.BackgroundColor3 = T.bg1
 wmRoot.BorderSizePixel = 0
 wmRoot.ClipsDescendants = true
 wmRoot.Parent = wmScreenGui
+wmRoot.Visible = Core.settings.watermark or false
 
 local wmScale = Instance.new("UIScale")
 wmScale.Scale = (Core.settings.watermarkScale or 100) / 100
