@@ -399,14 +399,14 @@ local fbGrad = Instance.new("UIGradient", floatBtn); fbGrad.Color = ColorSequenc
 local fbStroke = Instance.new("UIStroke", floatBtn); fbStroke.Color = T.accent; fbStroke.Thickness = 1.5; fbStroke.Transparency = 0.3; fbStroke.Parent = floatBtn
 
 local barContainer = Instance.new("Frame", floatBtn)
-barContainer.Size = UDim2.new(0, 32, 1, -18); barContainer.Position = UDim2.new(0.5, -16, 0.5, 0); barContainer.BackgroundTransparency = 1
+barContainer.Size = UDim2.new(0, 32, 1, -18); barContainer.Position = UDim2.new(0.5, -16, 0.5, 0); barContainer.AnchorPoint = Vector2.new(0, 0.5); barContainer.BackgroundTransparency = 1
 local barLayout = Instance.new("UIListLayout", barContainer)
 barLayout.FillDirection = Enum.FillDirection.Horizontal; barLayout.Padding = UDim.new(0, 3); barLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 
 local bars = {}
 for i = 1, 5 do
     local bar = Instance.new("Frame", barContainer)
-    bar.AnchorPoint = Vector2.new(0, 0.5); bar.Size = UDim2.new(0, 4, 0.3, 0); bar.Position = UDim2.new(0, 0, 0.5, 0); bar.BackgroundColor3 = T.accent; bar.BorderSizePixel = 0
+    bar.Size = UDim2.new(0, 4, 0.3, 0); bar.BackgroundColor3 = T.accent; bar.BorderSizePixel = 0
     Instance.new("UICorner", bar).CornerRadius = UDim.new(1, 0)
     table.insert(bars, {frame = bar, phase = i * 0.8})
 end
