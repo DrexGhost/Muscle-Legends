@@ -29,7 +29,7 @@ local function build()
     Instance.new("UICorner", inputRow).CornerRadius = UDim.new(0, 10)
 
     local nameInput = Instance.new("TextBox", inputRow)
-    nameInput.Size = UDim2.new(1, -100, 1, 0); nameInput.Position = UDim2.new(0, 12, 0, 0); nameInput.BackgroundTransparency = 1; nameInput.Text = ""; nameInput.TextColor3 = Core.T.text; nameInput.TextSize = 12; nameInput.Font = Enum.Font.Gotham; nameInput.TextXAlignment = Enum.TextXAlignment.Left; nameInput.ClearTextOnFocus = false
+    nameInput.Size = UDim2.new(1, -100, 1, 0); nameInput.Position = UDim2.new(0, 12, 0, 0); nameInput.BackgroundTransparency = 1; nameInput.Text = ""; nameInput.PlaceholderText = ""; nameInput.TextColor3 = Core.T.text; nameInput.TextSize = 12; nameInput.Font = Enum.Font.Gotham; nameInput.TextXAlignment = Enum.TextXAlignment.Left; nameInput.ClearTextOnFocus = false
 
     local saveAsBtn = Instance.new("TextButton", inputRow)
     saveAsBtn.Size = UDim2.new(0, 80, 0, 28); saveAsBtn.Position = UDim2.new(1, -92, 0.5, -14); saveAsBtn.BackgroundColor3 = Core.T.accent; saveAsBtn.BorderSizePixel = 0; saveAsBtn.Text = "SAVE"; saveAsBtn.TextColor3 = Color3.fromRGB(10, 14, 24); saveAsBtn.TextSize = 11; saveAsBtn.Font = Enum.Font.GothamBold; saveAsBtn.AutoButtonColor = false
