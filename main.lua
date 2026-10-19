@@ -281,6 +281,10 @@ local function build()
         if Core.Watermark then Core.Watermark.setEnabled(v) end
     end, "watermark")
 
+    GUI.makeToggle(page, "Anti-AFK", "Защита от кика за неактивность", Core.settings.antiAfk, 6, function(v)
+        Core.settings.antiAfk = v
+    end, "antiAfk")
+
     tab.Button.MouseButton1Click:Connect(function() GUI.switchTab(tab, page) end)
     return tab, page
 end
