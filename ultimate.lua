@@ -1,45 +1,71 @@
 local Core, GUI = ...
 local RunService = game:GetService("RunService")
 
-local TRANSLATIONS = {
-    ["Golden Rebirth"] = "Уменьшает стоимость перерождения на 10%",
-    ["Galaxy Gains"] = "Увеличивает получаемую силу",
-    ["Muscle Mind"] = "Увеличивает получаемую силу за повторения",
-    ["Demon Damage"] = "Увеличивает урон по демонам",
-    ["Infernal Health"] = "Увеличивает здоровье",
-    ["Jungle Swift"] = "Увеличивает скорость в джунглях",
-    ["x2 Chest Rewards"] = "Удваивает награды из сундуков",
-    ["x2 Quest Rewards"] = "Удваивает награды за квесты",
-    ["+5% Rep Speed"] = "Ускоряет скорость повторений",
-    ["+1 Pet Slot"] = "Добавляет слот для питомца",
-    ["+10 Item Capacity"] = "Увеличивает вместимость предметов",
-    ["+1 Daily Spin"] = "Добавляет ежедневное вращение"
-}
-
 local function build()
     local tab = GUI.makeTab("Ultimate", 4, "settings")
     local page = GUI.makePage()
 
     GUI.makeSectionHeader(page, "Upgrades", 1)
 
+    local ultimateRefs = {}
     local order = 2
+
     for _, name in ipairs(Core.ABSOLUTE_ORDER) do
-        local desc = TRANSLATIONS[name] or "Улучшение"
-        GUI.makeToggle(page, name, desc, Core.settings.ultimates[name], order, function(v)
+        local attrName = "Ultimate" .. name:gsub("%s+", "")
+        local max = Core.ABSOLUTE_MAX[attrName] or 5
+        local lvl = Core.getUltimateLevel(name)
+        local desc = string.format("Прокачен %d/%d", lvl, max)
+        
+        local myToggle
+        myToggle = GUI.makeToggle(page, name, desc, Core.settings.ultimates[name], order, function(v)
+            if v then
+                local currentLvl = Core.getUltimateLevel(name)
+                if currentLvl >= max then
+                    if myToggle then myToggle.Set(false, true) end
+                    Core.settings.ultimates[name] = false
+                    return
+                end
+            end
             Core.settings.ultimates[name] = v
         end, "ult_" .. name:gsub("%s+", ""))
+        
+        ultimateRefs[name] = myToggle
         order = order + 1
     end
 
-    local lastUltimate = 0
+    local lastUICheck = 0
+    local lastBuy = 0
+    
     RunService.Heartbeat:Connect(function()
         local now = os.clock()
-        if now - lastUltimate > 2 then
-            lastUltimate = now
+        
+        if now - lastUICheck >= 1 then
+            lastUICheck = now
+            for _, name in ipairs(Core.ABSOLUTE_ORDER) do
+                local attrName = "Ultimate" .. name:gsub("%s+", "")
+                local max = Core.ABSOLUTE_MAX[attrName] or 5
+                local lvl = Core.getUltimateLevel(name)
+                local ref = ultimateRefs[name]
+                
+                if ref and ref.Desc then
+                    ref.Desc.Text = string.format("Прокачен %d/%d", lvl, max)
+                    if lvl >= max then
+                        if Core.settings.ultimates[name] then
+                            Core.settings.ultimates[name] = false
+                            ref.Set(false, true)
+                        end
+                    end
+                end
+            end
+        end
+        
+        if now - lastBuy >= 2 then
+            lastBuy = now
             for _, name in ipairs(Core.ABSOLUTE_ORDER) do
                 if Core.settings.ultimates[name] then
+                    local attrName = "Ultimate" .. name:gsub("%s+", "")
+                    local max = Core.ABSOLUTE_MAX[attrName] or 5
                     local lvl = Core.getUltimateLevel(name)
-                    local max = Core.ABSOLUTE_MAX["Ultimate" .. name:gsub("%s+", "")] or 5
                     if lvl < max then
                         Core.upgradeUltimate(name)
                         break
