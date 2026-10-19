@@ -29,10 +29,10 @@ local function build()
     Instance.new("UICorner", inputRow).CornerRadius = UDim.new(0, 10)
 
     local nameInput = Instance.new("TextBox", inputRow)
-    nameInput.Size = UDim2.new(1, -100, 1, 0); nameInput.Position = UDim2.new(0, 12, 0, 0); nameInput.BackgroundTransparency = 1; nameInput.PlaceholderText = "Config name..."; nameInput.TextColor3 = Core.T.text; nameInput.TextSize = 12; nameInput.Font = Enum.Font.Gotham; nameInput.TextXAlignment = Enum.TextXAlignment.Left; nameInput.ClearTextOnFocus = false
+    nameInput.Size = UDim2.new(1, -100, 1, 0); nameInput.Position = UDim2.new(0, 12, 0, 0); nameInput.BackgroundTransparency = 1; nameInput.Text = ""; nameInput.TextColor3 = Core.T.text; nameInput.TextSize = 12; nameInput.Font = Enum.Font.Gotham; nameInput.TextXAlignment = Enum.TextXAlignment.Left; nameInput.ClearTextOnFocus = false
 
     local saveAsBtn = Instance.new("TextButton", inputRow)
-    saveAsBtn.Size = UDim2.new(0, 80, 0, 28); saveAsBtn.Position = UDim2.new(1, -92, 0.5, -14); saveAsBtn.BackgroundColor3 = Core.T.accent; saveAsBtn.BorderSizePixel = 0; saveAsBtn.Text = "SAVE AS"; saveAsBtn.TextColor3 = Color3.fromRGB(10, 14, 24); saveAsBtn.TextSize = 11; saveAsBtn.Font = Enum.Font.GothamBold; saveAsBtn.AutoButtonColor = false
+    saveAsBtn.Size = UDim2.new(0, 80, 0, 28); saveAsBtn.Position = UDim2.new(1, -92, 0.5, -14); saveAsBtn.BackgroundColor3 = Core.T.accent; saveAsBtn.BorderSizePixel = 0; saveAsBtn.Text = "SAVE"; saveAsBtn.TextColor3 = Color3.fromRGB(10, 14, 24); saveAsBtn.TextSize = 11; saveAsBtn.Font = Enum.Font.GothamBold; saveAsBtn.AutoButtonColor = false
     Instance.new("UICorner", saveAsBtn).CornerRadius = UDim.new(0, 8)
 
     local configListFrame = Instance.new("Frame", page)
@@ -71,10 +71,10 @@ local function build()
     refreshConfigList()
 
     GUI.makeSectionHeader(page, "Appearance", 4)
-    GUI.makeSlider(page, "GUI Scale (%)", 70, 95, Core.settings.guiScale, 5, function(v) Core.settings.guiScale = v; GUI.setScale(v / 100) end, "guiScale")
+    GUI.makeSlider(page, "GUI Size", 70, 95, Core.settings.guiScale, 5, function(v) Core.settings.guiScale = v; GUI.setScale(v / 100) end, "guiScale")
     GUI.makeSlider(page, "Button Size", 40, 80, Core.settings.floatBtnSize, 6, function(v) Core.settings.floatBtnSize = v; GUI.setButtonSize(v) end, "floatBtnSize")
     
-    GUI.makeSlider(page, "Watermark Scale (%)", 60, 150, Core.settings.watermarkScale or 100, 7, function(v)
+    GUI.makeSlider(page, "Watermark Size", 60, 150, Core.settings.watermarkScale or 100, 7, function(v)
         Core.settings.watermarkScale = v
         if Core.Watermark then Core.Watermark.setScale(v / 100) end
     end, "watermarkScale")
