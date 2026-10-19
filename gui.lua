@@ -309,7 +309,7 @@ function GUI.makeToggle(parent, name, desc, default, order, callback, settingNam
     row.MouseLeave:Connect(function() TweenService:Create(row, TweenInfo.new(0.15), {BackgroundColor3 = T.card}):Play(); TweenService:Create(rowStroke, TweenInfo.new(0.15), {Color = T.stroke, Transparency = 0.4}):Play() end)
 
     if settingName then Core.toggleRefs[settingName] = { setEnabled = setState } end
-    return { Set = setState, Get = function() return state end }
+    return { Set = setState, Get = function() return state end, Desc = descLbl }
 end
 
 function GUI.makeSlider(parent, name, min, max, default, order, callback, settingName)
