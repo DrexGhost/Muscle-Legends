@@ -38,6 +38,7 @@ Core.T = {
 
 Core.settings = {
     menuOpen = true,
+    antiAfk = true,
     autoStrength = false,
     autoRebirth = false,
     autoClicker = false,
@@ -86,6 +87,21 @@ Core.ABSOLUTE_ORDER = {
     "Golden Rebirth", "Galaxy Gains", "Muscle Mind", "Demon Damage",
     "Infernal Health", "Jungle Swift", "x2 Chest Rewards", "x2 Quest Rewards",
     "+5% Rep Speed", "+1 Pet Slot", "+10 Item Capacity", "+1 Daily Spin",
+}
+
+Core.ABSOLUTE_MAP = {
+    ["Golden Rebirth"] = "UltimateGoldenRebirth",
+    ["Galaxy Gains"] = "UltimateGalaxyGains",
+    ["Muscle Mind"] = "UltimateMuscleMind",
+    ["Demon Damage"] = "UltimateDemonDamage",
+    ["Infernal Health"] = "UltimateInfernalHealth",
+    ["Jungle Swift"] = "UltimateJungleSwift",
+    ["x2 Chest Rewards"] = "UltimateChestRewards",
+    ["x2 Quest Rewards"] = "UltimateQuestRewards",
+    ["+5% Rep Speed"] = "UltimateRepSpeed",
+    ["+1 Pet Slot"] = "UltimatePetSlot",
+    ["+10 Item Capacity"] = "UltimateItemCapacity",
+    ["+1 Daily Spin"] = "UltimateDailySpin",
 }
 
 Core.ABSOLUTE_MAX = {
@@ -280,9 +296,24 @@ function Core.upgradeUltimate(name)
 end
 
 function Core.getUltimateLevel(name)
-    local attr = "Ultimate" .. name:gsub("%s+", "")
+    local attr = Core.ABSOLUTE_MAP[name]
+    if not attr then return 0 end
     local v = LocalPlayer:GetAttribute(attr)
     return typeof(v) == "number" and v or 0
 end
+
+Core.loadSettings()
+Core.settings.antiAfk = true
+Core.saveSetting("antiAfk", true)
+
+task.spawn(function()
+    while task.wait(60) do
+        if Core.settings.antiAfk then
+            local vu = game:GetService("VirtualUser")
+            vu:CaptureController()
+            vu:ClickButton2(Vector2.new())
+        end
+    end
+end)
 
 return Core
