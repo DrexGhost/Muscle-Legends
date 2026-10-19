@@ -2,7 +2,7 @@ local Core, GUI = ...
 local RunService = game:GetService("RunService")
 
 local function build()
-    local tab = GUI.makeTab("Ultimate", 4, "settings")
+    local tab = GUI.makeTab("Ultimate ", 4, "settings")
     local page = GUI.makePage()
 
     GUI.makeSectionHeader(page, "Upgrades", 1)
