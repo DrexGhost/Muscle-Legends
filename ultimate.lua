@@ -11,7 +11,7 @@ local function build()
     local order = 2
 
     for _, name in ipairs(Core.ABSOLUTE_ORDER) do
-        local attrName = "Ultimate" .. name:gsub("%s+", "")
+        local attrName = Core.ABSOLUTE_MAP[name]
         local max = Core.ABSOLUTE_MAX[attrName] or 5
         local lvl = Core.getUltimateLevel(name)
         local desc = string.format("Прокачен %d/%d", lvl, max)
@@ -42,7 +42,7 @@ local function build()
         if now - lastUICheck >= 1 then
             lastUICheck = now
             for _, name in ipairs(Core.ABSOLUTE_ORDER) do
-                local attrName = "Ultimate" .. name:gsub("%s+", "")
+                local attrName = Core.ABSOLUTE_MAP[name]
                 local max = Core.ABSOLUTE_MAX[attrName] or 5
                 local lvl = Core.getUltimateLevel(name)
                 local ref = ultimateRefs[name]
@@ -63,7 +63,7 @@ local function build()
             lastBuy = now
             for _, name in ipairs(Core.ABSOLUTE_ORDER) do
                 if Core.settings.ultimates[name] then
-                    local attrName = "Ultimate" .. name:gsub("%s+", "")
+                    local attrName = Core.ABSOLUTE_MAP[name]
                     local max = Core.ABSOLUTE_MAX[attrName] or 5
                     local lvl = Core.getUltimateLevel(name)
                     if lvl < max then
