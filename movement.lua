@@ -60,7 +60,7 @@ local function build()
         end
     end, "noclip")
 
-    GUI.makeToggle(page, "Speed", "Ускорение", Core.settings.speed, 3, function(v)
+    GUI.makeToggle(page, "Speed ", "Ускорение", Core.settings.speed, 3, function(v)
         Core.settings.speed = v
         if not v and LocalPlayer.Character then
             local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
@@ -68,7 +68,7 @@ local function build()
         end
     end, "speed")
 
-    GUI.makeToggle(page, "Size", "Размер персонажа", Core.settings.size, 4, function(v)
+    GUI.makeToggle(page, "Size ", "Размер персонажа", Core.settings.size, 4, function(v)
         Core.settings.size = v
         if not v and LocalPlayer.Character then
             local hrp = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
