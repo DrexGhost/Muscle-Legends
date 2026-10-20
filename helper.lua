@@ -44,12 +44,12 @@ local function build()
         end)
     end
 
-    GUI.makeToggle(page, "Auto Strength", "Автоматически качает силу", Core.settings.autoStrength, 2, function(v) 
+    GUI.makeToggle(page, "Auto Strength ", "Автоматически качает силу", Core.settings.autoStrength, 2, function(v) 
         Core.settings.autoStrength = v
         if v then startAutoStr() else if autoStrThread then task.cancel(autoStrThread) end end
     end, "autoStrength")
 
-    GUI.makeToggle(page, "Auto Rebirth", "Автоматическое перерождение", Core.settings.autoRebirth, 3, function(v) 
+    GUI.makeToggle(page, "Auto Rebirth ", "Автоматическое перерождение", Core.settings.autoRebirth, 3, function(v) 
         Core.settings.autoRebirth = v
         if v then startAutoReb() else if autoRebThread then task.cancel(autoRebThread) end end
     end, "autoRebirth")
