@@ -47,6 +47,13 @@ local function build()
         end, "boss_" .. bName)
         bossRefs[bName] = ref
         order = order + 1
+
+        local key = "eventHeight" .. bName
+        local defaultHeight = Core.settings[key] or 143
+        GUI.makeSlider(page, bName .. " Height", 0, 300, defaultHeight, order, function(v)
+            Core.settings[key] = v
+        end, key)
+        order = order + 1
     end
 
     local any = false
@@ -122,7 +129,7 @@ local function build()
         Core.HRP.AssemblyLinearVelocity = Vector3.zero
         Core.HRP.AssemblyAngularVelocity = Vector3.zero
 
-        local height = Core.BOSS_HEIGHTS[currentBossModel.Name] or 143
+        local height = Core.settings["eventHeight" .. currentBossName] or Core.BOSS_HEIGHTS[currentBossModel.Name] or 143
         local targetPos = Vector3.new(currentBossPart.Position.X, height, currentBossPart.Position.Z)
         local lookTarget = currentBossPart.Position
 
