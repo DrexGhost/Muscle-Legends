@@ -29,7 +29,7 @@ local function build()
     end, "size")
 
     GUI.makeSectionHeader(page, "Settings", 5)
-    GUI.makeSlider(page, "Speed Value", 16, 200, Core.settings.walkSpeed, 6, function(v) Core.settings.walkSpeed = v end, "walkSpeed")
+    GUI.makeSlider(page, "Speed Value", 16, 500, Core.settings.walkSpeed, 6, function(v) Core.settings.walkSpeed = v end, "walkSpeed")
     GUI.makeSlider(page, "Size Value", 1, 100, Core.settings.sizeValue, 7, function(v) Core.settings.sizeValue = v end, "sizeValue")
 
     local lastSizeSent = 0
