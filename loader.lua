@@ -1,17 +1,22 @@
 local base = "https://raw.githubusercontent.com/DrexGhost/Muscle-Legends/main/"
 
+local function httpGet(url)
+    if request then
+        local ok, res = pcall(request, {Url = url, Method = "GET"})
+        if ok and res and res.Success and res.Body then return res.Body end
+    end
+    local ok, body = pcall(game.HttpGet, game, url)
+    if ok then return body end
+    return nil
+end
+
 local function fetch(name)
-    local url = base .. name
-    local ok, code = pcall(function()
-        return game:HttpGet(url)
-    end)
-    if not ok then return nil end
-    return code
+    return httpGet(base .. name)
 end
 
 local function compile(name, code)
     if not code then return nil end
-    local fn, err = loadstring(code)
+    local fn = loadstring(code)
     if not fn then return nil end
     return fn
 end
@@ -25,8 +30,6 @@ end
 
 local Core = run("core.lua", compile("core.lua", fetch("core.lua")))
 if not Core then return end
-
-Core.loadSettings()
 
 local GUI = run("gui.lua", compile("gui.lua", fetch("gui.lua")), Core)
 if not GUI then return end
