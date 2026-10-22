@@ -11,9 +11,12 @@ local function build()
         if not v and not Core.settings.collectChest then Core.stopFarm() end
     end, "bossFarm")
 
+    local bossNames = {"Common", "Rare", "Epic", "Legendary", "Mystical", "Rainbow"}
+
     for i = 1, 6 do
         local key = "bossHeight" .. i
-        GUI.makeSlider(page, "Boss" .. i .. " Height", 0, 300, Core.settings[key] or 143, 2 + i, function(v)
+        local label = (bossNames[i] or ("Boss" .. i)) .. " Height"
+        GUI.makeSlider(page, label, 0, 300, Core.settings[key] or 143, 2 + i, function(v)
             Core.settings[key] = v
         end, key)
     end
