@@ -1,6 +1,5 @@
 local Core, GUI = ...
 local RunService = game:GetService("RunService")
-local LocalPlayer = game:GetService("Players").LocalPlayer
 
 local function build()
     local tab = GUI.makeTab("Farm", 3, "farm")
@@ -9,17 +8,18 @@ local function build()
     GUI.makeSectionHeader(page, "Boss Farm", 1)
     GUI.makeToggle(page, "Boss Farm", "Фарм боссов", Core.settings.bossFarm, 2, function(v)
         Core.settings.bossFarm = v
+        if not v and not Core.settings.collectChest then Core.stopFarm() end
     end, "bossFarm")
 
     GUI.makeSectionHeader(page, "Chest", 3)
     GUI.makeToggle(page, "Collect Chest", "Сбор сундуков", Core.settings.collectChest, 4, function(v)
         Core.settings.collectChest = v
+        if not v and not Core.settings.bossFarm then Core.stopFarm() end
     end, "collectChest")
 
     local lastAttack, lastSearchTime, lastChestTime = 0, 0, 0
     local currentBossModel, currentBossPart, bossWasAlive = nil, nil, false
     local chestIndex = 1
-    local RETURN_POS = Vector3.new(-16.9, 36.3, -1243.5)
 
     local function getBoss()
         local events = workspace:FindFirstChild("Events")
@@ -38,38 +38,37 @@ local function build()
     end
 
     RunService.Heartbeat:Connect(function()
-        local char = LocalPlayer.Character
-        if not char then return end
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if not hrp or not hum then return end
+        if not Core.settings.collectChest and not Core.settings.bossFarm then return end
+        if not Core.HRP or not Core.HRP.Parent or not Core.Hum then return end
 
         local now = os.clock()
 
-        if Core.settings.collectChest then
+        if Core.settings.collectChest and not currentBossPart then
             if now - lastChestTime > 2 then
                 lastChestTime = now
+                if not Core.NoclipActive then Core.setNoclip(true); Core.NoclipActive = true end
+                Core.Hum.PlatformStand = true
+                Core.HRP.AssemblyLinearVelocity = Vector3.zero
+                Core.HRP.AssemblyAngularVelocity = Vector3.zero
                 local chest = Core.CHESTS[chestIndex]
-                if chest then
-                    hum.PlatformStand = true
-                    hrp.CFrame = CFrame.new(chest.coords + Vector3.new(0, 3, 0))
-                end
+                if chest then Core.HRP.CFrame = CFrame.new(chest + Vector3.new(0, 3, 0)) end
                 chestIndex = chestIndex + 1
                 if chestIndex > #Core.CHESTS then chestIndex = 1 end
             end
-            return 
         end
 
         if Core.settings.bossFarm then
             if currentBossPart then
                 if not currentBossPart.Parent or currentBossPart.Position.Y <= 0 then
+                    if bossWasAlive then Core.returnToBase() end
                     currentBossModel, currentBossPart, bossWasAlive = nil, nil, false
                 else
                     local hp = currentBossModel:GetAttribute("Health") or currentBossPart:GetAttribute("Health")
-                    if hp and hp > 0 then bossWasAlive = true
+                    if hp and hp > 0 then
+                        bossWasAlive = true
                     elseif hp and hp <= 0 then
                         if bossWasAlive then
-                            hrp.CFrame = CFrame.new(RETURN_POS)
+                            Core.returnToBase()
                             currentBossModel, currentBossPart, bossWasAlive = nil, nil, false
                         end
                     end
@@ -87,18 +86,24 @@ local function build()
                 if not currentBossPart then return end
             end
 
-            for _, p in ipairs(char:GetDescendants()) do
-                if p:IsA("BasePart") then p.CanCollide = false end
+            if not Core.NoclipActive then
+                Core.setNoclip(true)
+                Core.NoclipActive = true
             end
-            hum.AutoRotate = false
-            hum.PlatformStand = true
+
+            Core.Hum.AutoRotate = false
+            Core.Hum.PlatformStand = true
+            Core.HRP.AssemblyLinearVelocity = Vector3.zero
+            Core.HRP.AssemblyAngularVelocity = Vector3.zero
 
             local height = Core.BOSS_HEIGHTS[currentBossModel.Name] or 143
             local targetPos = Vector3.new(currentBossPart.Position.X, height, currentBossPart.Position.Z)
             local lookTarget = currentBossPart.Position
-            
-            if (targetPos - lookTarget).Magnitude < 1 then lookTarget = targetPos + Vector3.new(0, 0, -1) end
-            hrp.CFrame = CFrame.lookAt(targetPos, lookTarget)
+
+            if (targetPos - lookTarget).Magnitude < 1 then
+                lookTarget = targetPos + Vector3.new(0, 0, -1)
+            end
+            Core.HRP.CFrame = CFrame.lookAt(targetPos, lookTarget)
 
             if now - lastAttack >= 0.4 then
                 lastAttack = now
