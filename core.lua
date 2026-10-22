@@ -42,7 +42,9 @@ Core.settings = {
     speed = false, walkSpeed = 50, size = false, sizeValue = 2,
     autoEventFarm = false, eventBosses = {EASY = false, MEDIUM = false, HARD = false, EXTREME = false},
     ultimates = {}, watermark = false, watermarkScale = 100, guiScale = 85,
-    floatBtnSize = 58, floatBtnPos = {0, 20, 0.5, 0}
+    floatBtnSize = 58, floatBtnPos = {0, 20, 0.5, 0},
+    bossHeight1 = 143, bossHeight2 = 143, bossHeight3 = 143,
+    bossHeight4 = 143, bossHeight5 = 143, bossHeight6 = 143,
 }
 
 Core.CHESTS = {
