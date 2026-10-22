@@ -1,5 +1,4 @@
 local Core, GUI = ...
-local RunService = game:GetService("RunService")
 
 local function build()
     local tab = GUI.makeTab("Ultimate ", 4, "settings")
@@ -15,7 +14,7 @@ local function build()
         local max = Core.ABSOLUTE_MAX[attrName] or 5
         local lvl = Core.getUltimateLevel(name)
         local desc = string.format("Прокачен %d/%d", lvl, max)
-        
+
         local myToggle
         myToggle = GUI.makeToggle(page, name, desc, Core.settings.ultimates[name], order, function(v)
             if v then
@@ -28,39 +27,34 @@ local function build()
             end
             Core.settings.ultimates[name] = v
         end, "ult_" .. name:gsub("%s+", ""))
-        
+
         ultimateRefs[name] = myToggle
         order = order + 1
     end
 
-    local lastUICheck = 0
-    local lastBuy = 0
-    
-    RunService.Heartbeat:Connect(function()
-        local now = os.clock()
-        
-        if now - lastUICheck >= 1 then
-            lastUICheck = now
+    task.spawn(function()
+        while GUI.screenGui.Parent do
+            task.wait(1)
             for _, name in ipairs(Core.ABSOLUTE_ORDER) do
                 local attrName = Core.ABSOLUTE_MAP[name]
                 local max = Core.ABSOLUTE_MAX[attrName] or 5
                 local lvl = Core.getUltimateLevel(name)
                 local ref = ultimateRefs[name]
-                
+
                 if ref and ref.Desc then
                     ref.Desc.Text = string.format("Прокачен %d/%d", lvl, max)
-                    if lvl >= max then
-                        if Core.settings.ultimates[name] then
-                            Core.settings.ultimates[name] = false
-                            ref.Set(false, true)
-                        end
+                    if lvl >= max and Core.settings.ultimates[name] then
+                        Core.settings.ultimates[name] = false
+                        ref.Set(false, true)
                     end
                 end
             end
         end
-        
-        if now - lastBuy >= 2 then
-            lastBuy = now
+    end)
+
+    task.spawn(function()
+        while GUI.screenGui.Parent do
+            task.wait(2)
             for _, name in ipairs(Core.ABSOLUTE_ORDER) do
                 if Core.settings.ultimates[name] then
                     local attrName = Core.ABSOLUTE_MAP[name]
