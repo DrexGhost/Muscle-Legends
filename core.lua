@@ -45,6 +45,8 @@ Core.settings = {
     floatBtnSize = 58, floatBtnPos = {0, 20, 0.5, 0},
     bossHeight1 = 143, bossHeight2 = 143, bossHeight3 = 143,
     bossHeight4 = 143, bossHeight5 = 143, bossHeight6 = 143,
+    eventHeightEXTREME = 255, eventHeightHARD = 145,
+    eventHeightMEDIUM = 256, eventHeightEASY = 156,
 }
 
 Core.CHESTS = {
