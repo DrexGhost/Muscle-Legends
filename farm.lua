@@ -11,8 +11,15 @@ local function build()
         if not v and not Core.settings.collectChest then Core.stopFarm() end
     end, "bossFarm")
 
-    GUI.makeSectionHeader(page, "Chest", 3)
-    GUI.makeToggle(page, "Collect Chest", "Сбор сундуков", Core.settings.collectChest, 4, function(v)
+    for i = 1, 6 do
+        local key = "bossHeight" .. i
+        GUI.makeSlider(page, "Boss" .. i .. " Height", 0, 300, Core.settings[key] or 143, 2 + i, function(v)
+            Core.settings[key] = v
+        end, key)
+    end
+
+    GUI.makeSectionHeader(page, "Chest", 10)
+    GUI.makeToggle(page, "Collect Chest", "Сбор сундуков", Core.settings.collectChest, 11, function(v)
         Core.settings.collectChest = v
         if not v and not Core.settings.bossFarm then Core.stopFarm() end
     end, "collectChest")
@@ -35,6 +42,14 @@ local function build()
             end
         end
         return nil
+    end
+
+    local function getBossHeight(name)
+        local idx = tostring(name):match("^Boss(%d+)$")
+        if idx then
+            return Core.settings["bossHeight" .. idx] or 143
+        end
+        return Core.BOSS_HEIGHTS[name] or 143
     end
 
     RunService.Heartbeat:Connect(function()
@@ -96,7 +111,7 @@ local function build()
             Core.HRP.AssemblyLinearVelocity = Vector3.zero
             Core.HRP.AssemblyAngularVelocity = Vector3.zero
 
-            local height = Core.BOSS_HEIGHTS[currentBossModel.Name] or 143
+            local height = getBossHeight(currentBossModel.Name)
             local targetPos = Vector3.new(currentBossPart.Position.X, height, currentBossPart.Position.Z)
             local lookTarget = currentBossPart.Position
 
