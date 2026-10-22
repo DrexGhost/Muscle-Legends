@@ -13,7 +13,7 @@ wmScreenGui.Name = "NexusWatermark"
 wmScreenGui.ResetOnSpawn = false
 wmScreenGui.IgnoreGuiInset = true
 wmScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-wmScreenGui.DisplayOrder = 1000
+wmScreenGui.DisplayOrder = 999
 wmScreenGui.Parent = PlayerGui
 
 local wmRoot = Instance.new("Frame")
@@ -239,12 +239,12 @@ local function build()
 
     local nameText = Instance.new("TextLabel", profileCard)
     nameText.Size = UDim2.new(1, -100, 0, 20); nameText.Position = UDim2.new(0, 92, 0, 22); nameText.BackgroundTransparency = 1; nameText.Text = LocalPlayer.DisplayName; nameText.TextColor3 = T.text; nameText.TextSize = 15; nameText.Font = Enum.Font.GothamBold; nameText.TextXAlignment = Enum.TextXAlignment.Left; nameText.ZIndex = 4
-    
+
     local userText = Instance.new("TextLabel", profileCard)
     userText.Size = UDim2.new(1, -100, 0, 14); userText.Position = UDim2.new(0, 92, 0, 42); userText.BackgroundTransparency = 1; userText.Text = "@" .. LocalPlayer.Name; userText.TextColor3 = T.textDim; userText.TextSize = 11; userText.Font = Enum.Font.Gotham; userText.TextXAlignment = Enum.TextXAlignment.Left; userText.ZIndex = 4
 
     GUI.makeSectionHeader(page, "Stats", 2)
-    
+
     local statsRow = Instance.new("Frame", page)
     statsRow.Size = UDim2.new(1, 0, 0, 56); statsRow.BackgroundTransparency = 1; statsRow.LayoutOrder = 3
     local statsLayout = Instance.new("UIListLayout", statsRow); statsLayout.FillDirection = Enum.FillDirection.Horizontal; statsLayout.Padding = UDim.new(0, 8); statsLayout.Parent = statsRow
@@ -275,7 +275,7 @@ local function build()
     end)
 
     GUI.makeSectionHeader(page, "Other", 4)
-    
+
     GUI.makeToggle(page, "Watermark", "Показать Watermark на экране", Core.settings.watermark, 5, function(v)
         Core.settings.watermark = v
         if Core.Watermark then Core.Watermark.setEnabled(v) end
