@@ -13,7 +13,7 @@ wmScreenGui.Name = "NexusWatermark"
 wmScreenGui.ResetOnSpawn = false
 wmScreenGui.IgnoreGuiInset = true
 wmScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-wmScreenGui.DisplayOrder = 999
+wmScreenGui.DisplayOrder = 500
 wmScreenGui.Parent = PlayerGui
 
 local wmRoot = Instance.new("Frame")
@@ -284,6 +284,31 @@ local function build()
     GUI.makeToggle(page, "Anti-AFK", "Защита от кика за неактивность", Core.settings.antiAfk, 6, function(v)
         Core.settings.antiAfk = v
     end, "antiAfk")
+
+    local isRedeeming = false
+    local redeemBtn
+    redeemBtn = GUI.makeActionButton(page, "Redeem Codes", "primary", 7, function()
+        if isRedeeming then return end
+        isRedeeming = true
+        Core.redeemAllCodes(
+            function(i, total, code)
+                if redeemBtn then
+                    redeemBtn.Text = "Активация " .. i .. "/" .. total .. ": " .. code
+                end
+            end,
+            function(success)
+                if redeemBtn then
+                    redeemBtn.Text = success and "Готово!" or "Ошибка: нет codeRemote"
+                    task.delay(2, function()
+                        if redeemBtn then
+                            redeemBtn.Text = "Redeem Codes"
+                            isRedeeming = false
+                        end
+                    end)
+                end
+            end
+        )
+    end)
 
     tab.Button.MouseButton1Click:Connect(function() GUI.switchTab(tab, page) end)
     return tab, page
