@@ -165,18 +165,19 @@ local function build()
         if not GUI.Main.Visible or not page.Visible then return end
         closeToolMenu(true)
 
-        local pos = gearBtn.AbsolutePosition
-        local sz = gearBtn.AbsoluteSize
-        local viewH = workspace.CurrentCamera.ViewportSize.Y
+        local cPos = GUI.Content.AbsolutePosition
+        local cSize = GUI.Content.AbsoluteSize
+        
+        local menuW = 200
         local menuH = 40 + #Core.STRENGTH_TOOLS * 38 + 8
 
-        local yPos = pos.Y + sz.Y + 4
-        if yPos + menuH > viewH then yPos = pos.Y - menuH - 4 end
+        local targetX = cPos.X + (cSize.X / 2) - (menuW / 2)
+        local targetY = cPos.Y + (cSize.Y / 2) - (menuH / 2)
 
         toolMenu = Instance.new("TextButton")
         toolMenu.Name = "StrengthToolMenu"
-        toolMenu.Size = UDim2.new(0, 200, 0, 0)
-        toolMenu.Position = UDim2.new(0, pos.X - 85, 0, yPos + menuH / 2)
+        toolMenu.Size = UDim2.new(0, menuW, 0, 0)
+        toolMenu.Position = UDim2.new(0, targetX, 0, targetY + menuH / 2)
         toolMenu.BackgroundColor3 = T.panel
         toolMenu.BorderSizePixel = 0
         toolMenu.Text = ""
@@ -296,8 +297,8 @@ local function build()
         end
 
         TweenService:Create(toolMenu, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-            Size = UDim2.new(0, 200, 0, menuH),
-            Position = UDim2.new(0, pos.X - 85, 0, yPos)
+            Size = UDim2.new(0, menuW, 0, menuH),
+            Position = UDim2.new(0, targetX, 0, targetY)
         }):Play()
 
         menuOpen = true
