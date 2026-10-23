@@ -205,8 +205,30 @@ local function buildIcon(holder, kind, color)
         local l2 = Instance.new("Frame")
         l2.Size = UDim2.new(0, 14, 0, 2); l2.AnchorPoint = Vector2.new(0.5, 0.5); l2.Position = UDim2.new(0.5, 0, 0.5, 0); l2.Rotation = -45; l2.BackgroundColor3 = color; l2.BorderSizePixel = 0; l2.Parent = base
     elseif kind == "helper" then
-        mk(UDim2.new(0, 4, 0, 14), UDim2.new(0, 6, 0, 1), 2)
-        mk(UDim2.new(0, 10, 0, 4), UDim2.new(0, 3, 0, 6), 2)
+        local wrapper = Instance.new("Frame")
+        wrapper.Size = UDim2.new(1, 0, 1, 0)
+        wrapper.BackgroundTransparency = 1
+        wrapper.Parent = base
+
+        local function mkDb(size, posX, posY, corner)
+            local f = Instance.new("Frame")
+            f.Size = size
+            f.AnchorPoint = Vector2.new(0.5, 0.5)
+            f.Position = UDim2.new(0.5, posX, 0.5, posY)
+            f.BackgroundColor3 = color
+            f.BorderSizePixel = 0
+            f.Parent = wrapper
+            Instance.new("UICorner", f).CornerRadius = UDim.new(0, corner)
+            return f
+        end
+
+        mkDb(UDim2.new(0, 8, 0, 2), 0, 0, 1)
+        mkDb(UDim2.new(0, 2, 0, 4), -9, 0, 1)
+        mkDb(UDim2.new(0, 2, 0, 4), 9, 0, 1)
+        mkDb(UDim2.new(0, 3, 0, 8), -7, 0, 1)
+        mkDb(UDim2.new(0, 3, 0, 8), 7, 0, 1)
+        mkDb(UDim2.new(0, 4, 0, 10), -4, 0, 1)
+        mkDb(UDim2.new(0, 4, 0, 10), 4, 0, 1)
     elseif kind == "farm" then
         local wrapper = Instance.new("Frame")
         wrapper.Size = UDim2.new(1, 0, 1, 0)
