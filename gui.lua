@@ -63,7 +63,7 @@ TopBar.Size = UDim2.new(1, 0, 0, 58)
 TopBar.BackgroundColor3 = T.panel
 TopBar.BorderSizePixel = 0
 TopBar.Image = "rbxassetid://77832483886111"
-TopBar.ScaleType = Enum.ScaleType.Crop
+TopBar.ScaleType = Enum.ScaleType.Stretch
 TopBar.ZIndex = 2
 TopBar.Parent = Main
 makeCorner(TopBar, 24)
