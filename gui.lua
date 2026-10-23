@@ -57,13 +57,11 @@ uiScale.Scale = (Core.settings.guiScale or 85) / 100
 uiScale.Parent = Main
 GUI.uiScale = uiScale
 
-local TopBar = Instance.new("ImageLabel")
+local TopBar = Instance.new("Frame")
 TopBar.Name = "TopBar"
 TopBar.Size = UDim2.new(1, 0, 0, 58)
 TopBar.BackgroundColor3 = T.panel
 TopBar.BorderSizePixel = 0
-TopBar.Image = "rbxassetid://77832483886111"
-TopBar.ScaleType = Enum.ScaleType.Stretch
 TopBar.ZIndex = 2
 TopBar.Parent = Main
 makeCorner(TopBar, 24)
@@ -72,7 +70,7 @@ local TopBarMask = Instance.new("Frame")
 TopBarMask.Name = "TopBarMask"
 TopBarMask.Size = UDim2.new(1, 0, 0, 24)
 TopBarMask.Position = UDim2.new(0, 0, 1, -24)
-TopBarMask.BackgroundColor3 = T.bg2
+TopBarMask.BackgroundColor3 = T.panel
 TopBarMask.BorderSizePixel = 0
 TopBarMask.ZIndex = 3
 TopBarMask.Parent = TopBar
