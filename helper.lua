@@ -128,8 +128,28 @@ local function build()
     local menuOpen = false
 
     local function closeToolMenu()
-        if toolMenu then toolMenu:Destroy() toolMenu = nil end
-        menuOpen = false
+        if toolMenu then
+            menuOpen = false
+            local m = toolMenu
+            toolMenu = nil
+            
+            local p = m.Position
+            local h = m.Size.Y.Offset
+
+            TweenService:Create(m, TweenInfo.new(0.15, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
+                Size = UDim2.new(0, 200, 0, 0),
+                Position = UDim2.new(0, p.X.Offset, 0, p.Y.Offset + h / 2),
+                BackgroundTransparency = 1
+            }):Play()
+
+            for _, child in ipairs(m:GetDescendants()) do
+                if child:IsA("GuiObject") and child ~= m then
+                    TweenService:Create(child, TweenInfo.new(0.15), {BackgroundTransparency = 1, TextTransparency = 1}):Play()
+                end
+            end
+
+            task.delay(0.15, function() if m then m:Destroy() end end)
+        end
     end
 
     local function openToolMenu()
@@ -145,13 +165,15 @@ local function build()
 
         toolMenu = Instance.new("Frame")
         toolMenu.Name = "StrengthToolMenu"
-        toolMenu.Size = UDim2.new(0, 200, 0, menuH)
-        toolMenu.Position = UDim2.new(0, pos.X - 85, 0, yPos)
+        toolMenu.Size = UDim2.new(0, 200, 0, 0)
+        toolMenu.Position = UDim2.new(0, pos.X - 85, 0, yPos + menuH / 2)
         toolMenu.BackgroundColor3 = T.panel
         toolMenu.BorderSizePixel = 0
         toolMenu.ZIndex = 100
+        toolMenu.ClipsDescendants = true
         toolMenu.Parent = GUI.screenGui
         Instance.new("UICorner", toolMenu).CornerRadius = UDim.new(0, 10)
+
         local mStroke = Instance.new("UIStroke", toolMenu)
         mStroke.Color = T.stroke
         mStroke.Thickness = 1
@@ -162,7 +184,7 @@ local function build()
         header.Size = UDim2.new(1, -40, 0, 26)
         header.Position = UDim2.new(0, 12, 0, 8)
         header.BackgroundTransparency = 1
-        header.Text = "Strength Tool"
+        header.Text = "Swing"
         header.TextColor3 = T.text
         header.TextSize = 12
         header.Font = Enum.Font.GothamBold
@@ -196,30 +218,74 @@ local function build()
         local mOrder = 1
         for _, toolName in ipairs(Core.STRENGTH_TOOLS) do
             local isActive = Core.settings.strengthTool == toolName
+            
             local btn = Instance.new("TextButton", list)
             btn.Size = UDim2.new(1, 0, 0, 34)
-            btn.BackgroundColor3 = isActive and T.accent or T.card
+            btn.BackgroundColor3 = T.card
             btn.BorderSizePixel = 0
-            btn.Text = toolName
-            btn.TextColor3 = isActive and Color3.fromRGB(10, 14, 24) or T.text
-            btn.TextSize = 12
-            btn.Font = Enum.Font.GothamBold
+            btn.Text = ""
             btn.AutoButtonColor = false
             btn.LayoutOrder = mOrder
             btn.ZIndex = 102
             Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
 
+            local lbl = Instance.new("TextLabel", btn)
+            lbl.Size = UDim2.new(1, -45, 1, 0)
+            lbl.Position = UDim2.new(0, 12, 0, 0)
+            lbl.BackgroundTransparency = 1
+            lbl.Text = toolName
+            lbl.TextColor3 = T.text
+            lbl.TextSize = 12
+            lbl.Font = Enum.Font.GothamBold
+            lbl.TextXAlignment = Enum.TextXAlignment.Left
+            lbl.ZIndex = 103
+
+            local pill = Instance.new("Frame", btn)
+            pill.Name = "Pill"
+            pill.Size = UDim2.new(0, 26, 0, 14)
+            pill.Position = UDim2.new(1, -36, 0.5, -7)
+            pill.BackgroundColor3 = isActive and T.accent or T.toggleOff
+            pill.BorderSizePixel = 0
+            pill.ZIndex = 103
+            Instance.new("UICorner", pill).CornerRadius = UDim.new(1, 0)
+
+            local knob = Instance.new("Frame", pill)
+            knob.Name = "Knob"
+            knob.Size = UDim2.new(0, 10, 0, 10)
+            knob.Position = isActive and UDim2.new(1, -12, 0.5, -5) or UDim2.new(0, 2, 0.5, -5)
+            knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            knob.BorderSizePixel = 0
+            knob.ZIndex = 104
+            Instance.new("UICorner", knob).CornerRadius = UDim.new(1, 0)
+
             btn.MouseButton1Click:Connect(function()
                 Core.settings.strengthTool = toolName
                 Core.saveSetting("strengthTool", toolName)
+                
                 if autoStrToggle and autoStrToggle.Desc then
                     autoStrToggle.Desc.Text = "Качает: " .. toolName
                 end
-                closeToolMenu()
+
+                for _, otherBtn in ipairs(list:GetChildren()) do
+                    if otherBtn:IsA("TextButton") then
+                        local p = otherBtn:FindFirstChild("Pill")
+                        local k = p and p:FindFirstChild("Knob")
+                        if p and k then
+                            local isCurrent = (otherBtn:FindFirstChildOfClass("TextLabel").Text == toolName)
+                            TweenService:Create(p, TweenInfo.new(0.15), {BackgroundColor3 = isCurrent and T.accent or T.toggleOff}):Play()
+                            TweenService:Create(k, TweenInfo.new(0.15), {Position = isCurrent and UDim2.new(1, -12, 0.5, -5) or UDim2.new(0, 2, 0.5, -5)}):Play()
+                        end
+                    end
+                end
             end)
 
             mOrder = mOrder + 1
         end
+
+        TweenService:Create(toolMenu, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            Size = UDim2.new(0, 200, 0, menuH),
+            Position = UDim2.new(0, pos.X - 85, 0, yPos)
+        }):Play()
 
         menuOpen = true
     end
