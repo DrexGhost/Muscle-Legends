@@ -368,7 +368,7 @@ local function build()
         if v then startAutoClick() else safeCancel(autoClickThread) end
     end, "autoClicker")
 
-    GUI.makeToggle(page, "Auto Spin", "Автоматически крутит колесо (раз в 1 сек)", Core.settings.autoSpin, 5, function(v)
+    GUI.makeToggle(page, "Auto Spin ", "Автоматически крутит колесо фортуны", Core.settings.autoSpin, 5, function(v)
         Core.settings.autoSpin = v
         if v then startAutoSpin() else safeCancel(autoSpinThread) end
     end, "autoSpin")
