@@ -17,10 +17,15 @@ local function build()
         autoStrThread = task.spawn(function()
             while Core.settings.autoStrength do
                 if Core.Char and Core.Char:FindFirstChildOfClass("Humanoid") then
-                    if not Core.hasDumbbell() then Core.equipDumbbell() end
-                    if Core.hasDumbbell() then
+                    local targetName = Core.settings.strengthTool or "Weight"
+                    if not Core.hasTool(targetName) then
+                        Core.equipTool(targetName)
+                    end
+                    if Core.hasTool(targetName) then
                         local tool = Core.Char:FindFirstChildOfClass("Tool")
-                        if tool then pcall(function() tool:Activate() end) end
+                        if tool and tool.Name == targetName then
+                            pcall(function() tool:Activate() end)
+                        end
                     end
                 end
                 task.wait(0.15)
@@ -66,6 +71,35 @@ local function build()
     if Core.settings.autoStrength then startAutoStr() end
     if Core.settings.autoRebirth then startAutoReb() end
     if Core.settings.autoClicker then startAutoClick() end
+
+    GUI.makeSectionHeader(page, "Strength Tool", 5)
+
+    local toolRefs = {}
+    local order = 6
+    for _, toolName in ipairs(Core.STRENGTH_TOOLS) do
+        local key = "strengthTool_" .. toolName
+        local isActive = Core.settings.strengthTool == toolName
+        local ref
+        ref = GUI.makeToggle(page, toolName, "Качать силу через " .. toolName, isActive, order, function(v)
+            if v then
+                Core.settings.strengthTool = toolName
+                Core.saveSetting("strengthTool", toolName)
+                for otherName, otherRef in pairs(toolRefs) do
+                    if otherName ~= toolName then
+                        Core.saveSetting("strengthTool_" .. otherName, false)
+                        if otherRef then otherRef.Set(false, true) end
+                    end
+                end
+            else
+                if Core.settings.strengthTool == toolName then
+                    Core.saveSetting(key, true)
+                    ref.Set(true, true)
+                end
+            end
+        end, key)
+        toolRefs[toolName] = ref
+        order = order + 1
+    end
 
     tab.Button.MouseButton1Click:Connect(function() GUI.switchTab(tab, page) end)
     return tab, page
