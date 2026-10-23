@@ -1,8 +1,10 @@
 local Core, GUI = ...
+local TweenService = game:GetService("TweenService")
 
 local function build()
     local tab = GUI.makeTab("Helper", 2, "helper")
     local page = GUI.makePage()
+    local T = Core.T
 
     GUI.makeSectionHeader(page, "Automation", 1)
 
@@ -21,11 +23,9 @@ local function build()
                     if not Core.hasTool(targetName) then
                         Core.equipTool(targetName)
                     end
-                    if Core.hasTool(targetName) then
-                        local tool = Core.Char:FindFirstChildOfClass("Tool")
-                        if tool and tool.Name == targetName then
-                            pcall(function() tool:Activate() end)
-                        end
+                    local tool = Core.Char:FindFirstChild(targetName)
+                    if tool and tool:IsA("Tool") then
+                        pcall(function() tool:Activate() end)
                     end
                 end
                 task.wait(0.15)
@@ -53,10 +53,153 @@ local function build()
         end)
     end
 
-    GUI.makeToggle(page, "Auto Strength ", "Автоматически качает силу", Core.settings.autoStrength, 2, function(v)
+    local autoStrHolder = Instance.new("Frame", page)
+    autoStrHolder.Size = UDim2.new(1, 0, 0, 48)
+    autoStrHolder.BackgroundTransparency = 1
+    autoStrHolder.LayoutOrder = 2
+
+    local gearBtn = Instance.new("TextButton", autoStrHolder)
+    gearBtn.Size = UDim2.new(0, 40, 1, 0)
+    gearBtn.Position = UDim2.new(0, 0, 0, 0)
+    gearBtn.BackgroundColor3 = T.card
+    gearBtn.BorderSizePixel = 0
+    gearBtn.Text = "🚀"
+    gearBtn.TextSize = 18
+    gearBtn.Font = Enum.Font.GothamBold
+    gearBtn.AutoButtonColor = false
+    gearBtn.ZIndex = 2
+    Instance.new("UICorner", gearBtn).CornerRadius = UDim.new(0, 10)
+    local gearStroke = Instance.new("UIStroke", gearBtn)
+    gearStroke.Color = T.stroke
+    gearStroke.Thickness = 1
+    gearStroke.Transparency = 0.4
+    gearStroke.Parent = gearBtn
+
+    gearBtn.MouseEnter:Connect(function()
+        TweenService:Create(gearBtn, TweenInfo.new(0.15), {BackgroundColor3 = T.cardHover}):Play()
+        TweenService:Create(gearStroke, TweenInfo.new(0.15), {Color = T.accent, Transparency = 0.5}):Play()
+    end)
+    gearBtn.MouseLeave:Connect(function()
+        TweenService:Create(gearBtn, TweenInfo.new(0.15), {BackgroundColor3 = T.card}):Play()
+        TweenService:Create(gearStroke, TweenInfo.new(0.15), {Color = T.stroke, Transparency = 0.4}):Play()
+    end)
+
+    local autoStrToggle = GUI.makeToggle(autoStrHolder, "Auto Strength ", "Качает: " .. (Core.settings.strengthTool or "Weight"), Core.settings.autoStrength, 1, function(v)
         Core.settings.autoStrength = v
         if v then startAutoStr() else safeCancel(autoStrThread) end
     end, "autoStrength")
+
+    for _, child in ipairs(autoStrHolder:GetChildren()) do
+        if child:IsA("TextButton") and child ~= gearBtn then
+            child.Position = UDim2.new(0, 48, 0, 0)
+            child.Size = UDim2.new(1, -48, 0, 48)
+            break
+        end
+    end
+
+    local toolMenu = nil
+    local menuOpen = false
+
+    local function closeToolMenu()
+        if toolMenu then toolMenu:Destroy() toolMenu = nil end
+        menuOpen = false
+    end
+
+    local function openToolMenu()
+        closeToolMenu()
+
+        local pos = gearBtn.AbsolutePosition
+        local sz = gearBtn.AbsoluteSize
+        local viewH = workspace.CurrentCamera.ViewportSize.Y
+        local menuH = 40 + #Core.STRENGTH_TOOLS * 38 + 8
+
+        local yPos = pos.Y + sz.Y + 4
+        if yPos + menuH > viewH then yPos = pos.Y - menuH - 4 end
+
+        toolMenu = Instance.new("Frame")
+        toolMenu.Name = "StrengthToolMenu"
+        toolMenu.Size = UDim2.new(0, 200, 0, menuH)
+        toolMenu.Position = UDim2.new(0, pos.X, 0, yPos)
+        toolMenu.BackgroundColor3 = T.panel
+        toolMenu.BorderSizePixel = 0
+        toolMenu.ZIndex = 100
+        toolMenu.Parent = GUI.screenGui
+        Instance.new("UICorner", toolMenu).CornerRadius = UDim.new(0, 10)
+        local mStroke = Instance.new("UIStroke", toolMenu)
+        mStroke.Color = T.stroke
+        mStroke.Thickness = 1
+        mStroke.Transparency = 0.3
+        mStroke.Parent = toolMenu
+
+        local header = Instance.new("TextLabel", toolMenu)
+        header.Size = UDim2.new(1, -40, 0, 26)
+        header.Position = UDim2.new(0, 12, 0, 8)
+        header.BackgroundTransparency = 1
+        header.Text = "Strength Tool"
+        header.TextColor3 = T.text
+        header.TextSize = 12
+        header.Font = Enum.Font.GothamBold
+        header.TextXAlignment = Enum.TextXAlignment.Left
+        header.ZIndex = 101
+
+        local closeX = Instance.new("TextButton", toolMenu)
+        closeX.Size = UDim2.new(0, 22, 0, 22)
+        closeX.Position = UDim2.new(1, -28, 0, 10)
+        closeX.BackgroundColor3 = T.panelHi
+        closeX.BorderSizePixel = 0
+        closeX.Text = "×"
+        closeX.TextColor3 = T.textDim
+        closeX.TextSize = 14
+        closeX.Font = Enum.Font.GothamBold
+        closeX.AutoButtonColor = false
+        closeX.ZIndex = 101
+        Instance.new("UICorner", closeX).CornerRadius = UDim.new(0, 5)
+        closeX.MouseButton1Click:Connect(closeToolMenu)
+
+        local list = Instance.new("Frame", toolMenu)
+        list.Size = UDim2.new(1, -16, 1, -46)
+        list.Position = UDim2.new(0, 8, 0, 40)
+        list.BackgroundTransparency = 1
+        list.ZIndex = 101
+
+        local ll = Instance.new("UIListLayout", list)
+        ll.Padding = UDim.new(0, 4)
+        ll.SortOrder = Enum.SortOrder.LayoutOrder
+
+        local mOrder = 1
+        for _, toolName in ipairs(Core.STRENGTH_TOOLS) do
+            local isActive = Core.settings.strengthTool == toolName
+            local btn = Instance.new("TextButton", list)
+            btn.Size = UDim2.new(1, 0, 0, 34)
+            btn.BackgroundColor3 = isActive and T.accent or T.card
+            btn.BorderSizePixel = 0
+            btn.Text = toolName
+            btn.TextColor3 = isActive and Color3.fromRGB(10, 14, 24) or T.text
+            btn.TextSize = 12
+            btn.Font = Enum.Font.GothamBold
+            btn.AutoButtonColor = false
+            btn.LayoutOrder = mOrder
+            btn.ZIndex = 102
+            Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+
+            btn.MouseButton1Click:Connect(function()
+                Core.settings.strengthTool = toolName
+                Core.saveSetting("strengthTool", toolName)
+                if autoStrToggle and autoStrToggle.Desc then
+                    autoStrToggle.Desc.Text = "Качает: " .. toolName
+                end
+                closeToolMenu()
+            end)
+
+            mOrder = mOrder + 1
+        end
+
+        menuOpen = true
+    end
+
+    gearBtn.MouseButton1Click:Connect(function()
+        if menuOpen then closeToolMenu() else openToolMenu() end
+    end)
 
     GUI.makeToggle(page, "Auto Rebirth ", "Автоматическое перерождение", Core.settings.autoRebirth, 3, function(v)
         Core.settings.autoRebirth = v
@@ -71,35 +214,6 @@ local function build()
     if Core.settings.autoStrength then startAutoStr() end
     if Core.settings.autoRebirth then startAutoReb() end
     if Core.settings.autoClicker then startAutoClick() end
-
-    GUI.makeSectionHeader(page, "Strength Tool", 5)
-
-    local toolRefs = {}
-    local order = 6
-    for _, toolName in ipairs(Core.STRENGTH_TOOLS) do
-        local key = "strengthTool_" .. toolName
-        local isActive = Core.settings.strengthTool == toolName
-        local ref
-        ref = GUI.makeToggle(page, toolName, "Качать силу через " .. toolName, isActive, order, function(v)
-            if v then
-                Core.settings.strengthTool = toolName
-                Core.saveSetting("strengthTool", toolName)
-                for otherName, otherRef in pairs(toolRefs) do
-                    if otherName ~= toolName then
-                        Core.saveSetting("strengthTool_" .. otherName, false)
-                        if otherRef then otherRef.Set(false, true) end
-                    end
-                end
-            else
-                if Core.settings.strengthTool == toolName then
-                    Core.saveSetting(key, true)
-                    ref.Set(true, true)
-                end
-            end
-        end, key)
-        toolRefs[toolName] = ref
-        order = order + 1
-    end
 
     tab.Button.MouseButton1Click:Connect(function() GUI.switchTab(tab, page) end)
     return tab, page
