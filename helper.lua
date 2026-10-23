@@ -62,14 +62,12 @@ local function build()
     local nameLbl = autoStrToggle.NameLabel
     local descLbl = autoStrToggle.DescLabel
 
-    nameLbl.Position = UDim2.new(0, 54, 0, 9)
-    nameLbl.Size = UDim2.new(1, -126, 0, 16)
-    descLbl.Position = UDim2.new(0, 54, 0, 26)
-    descLbl.Size = UDim2.new(1, -126, 0, 14)
+    nameLbl.Size = UDim2.new(1, -116, 0, 16)
+    descLbl.Size = UDim2.new(1, -116, 0, 14)
 
     local gearBtn = Instance.new("TextButton", row)
     gearBtn.Size = UDim2.new(0, 30, 0, 30)
-    gearBtn.Position = UDim2.new(0, 10, 0.5, -15)
+    gearBtn.Position = UDim2.new(1, -92, 0.5, -15)
     gearBtn.BackgroundColor3 = T.panelHi
     gearBtn.BorderSizePixel = 0
     gearBtn.Text = "🚀"
@@ -116,7 +114,7 @@ local function build()
         toolMenu = Instance.new("Frame")
         toolMenu.Name = "StrengthToolMenu"
         toolMenu.Size = UDim2.new(0, 200, 0, menuH)
-        toolMenu.Position = UDim2.new(0, pos.X, 0, yPos)
+        toolMenu.Position = UDim2.new(0, pos.X - 100, 0, yPos)
         toolMenu.BackgroundColor3 = T.panel
         toolMenu.BorderSizePixel = 0
         toolMenu.ZIndex = 100
