@@ -190,19 +190,21 @@ local ICON_IDS = {
     settings = "100589335929927"
 }
 
-local function buildIcon(holder, kind, color)
+local function buildIcon(holder, kind, isActive)
     for _, c in ipairs(holder:GetChildren()) do c:Destroy() end
     local id = ICON_IDS[kind]
-    if not id then return end
+    if not id then return nil end
 
     local img = Instance.new("ImageLabel")
     img.Size = UDim2.new(0, 16, 0, 16)
     img.Position = UDim2.new(0, 3, 0.5, -8)
     img.BackgroundTransparency = 1
     img.Image = "rbxassetid://" .. id
-    img.ImageColor3 = color
     img.ScaleType = Enum.ScaleType.Fit
+    img.ImageColor3 = Color3.fromRGB(255, 255, 255)
+    img.ImageTransparency = isActive and 0 or 0.35
     img.Parent = holder
+    return img
 end
 
 function GUI.makeTab(text, order, iconKind)
@@ -231,7 +233,7 @@ function GUI.makeTab(text, order, iconKind)
     iconHolder.Position = UDim2.new(0, 12, 0, 0)
     iconHolder.BackgroundTransparency = 1
     iconHolder.Parent = tab
-    buildIcon(iconHolder, iconKind, T.textDim)
+    local iconImg = buildIcon(iconHolder, iconKind, false)
 
     local textLabel = Instance.new("TextLabel")
     textLabel.Size = UDim2.new(1, -40, 1, 0)
@@ -252,12 +254,16 @@ function GUI.makeTab(text, order, iconKind)
             TweenService:Create(tab, TweenInfo.new(0.2), {BackgroundColor3 = T.card, BackgroundTransparency = 0.05}):Play()
             TweenService:Create(indicator, TweenInfo.new(0.25), {BackgroundTransparency = 0}):Play()
             TweenService:Create(textLabel, TweenInfo.new(0.2), {TextColor3 = T.text}):Play()
-            buildIcon(iconHolder, iconKind, T.accent)
+            if iconImg then
+                TweenService:Create(iconImg, TweenInfo.new(0.2), {ImageTransparency = 0}):Play()
+            end
         else
             TweenService:Create(tab, TweenInfo.new(0.2), {BackgroundTransparency = 1}):Play()
             TweenService:Create(indicator, TweenInfo.new(0.25), {BackgroundTransparency = 1}):Play()
             TweenService:Create(textLabel, TweenInfo.new(0.2), {TextColor3 = T.textDim}):Play()
-            buildIcon(iconHolder, iconKind, T.textDim)
+            if iconImg then
+                TweenService:Create(iconImg, TweenInfo.new(0.2), {ImageTransparency = 0.35}):Play()
+            end
         end
     end
 
@@ -265,12 +271,18 @@ function GUI.makeTab(text, order, iconKind)
         if not obj.Active then
             TweenService:Create(tab, TweenInfo.new(0.12), {BackgroundTransparency = 0.55, BackgroundColor3 = T.card}):Play()
             TweenService:Create(textLabel, TweenInfo.new(0.12), {TextColor3 = T.text}):Play()
+            if iconImg then
+                TweenService:Create(iconImg, TweenInfo.new(0.12), {ImageTransparency = 0.1}):Play()
+            end
         end
     end)
     tab.MouseLeave:Connect(function()
         if not obj.Active then
             TweenService:Create(tab, TweenInfo.new(0.12), {BackgroundTransparency = 1}):Play()
             TweenService:Create(textLabel, TweenInfo.new(0.12), {TextColor3 = T.textDim}):Play()
+            if iconImg then
+                TweenService:Create(iconImg, TweenInfo.new(0.12), {ImageTransparency = 0.35}):Play()
+            end
         end
     end)
 
