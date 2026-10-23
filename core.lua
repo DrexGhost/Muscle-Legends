@@ -280,6 +280,17 @@ function Core.equipTool(name)
     end
 end
 
+function Core.unequipOtherTools(keepName)
+    if not Core.Char then return end
+    local bp = LocalPlayer:FindFirstChild("Backpack")
+    if not bp then return end
+    for _, child in ipairs(Core.Char:GetChildren()) do
+        if child:IsA("Tool") and child.Name ~= keepName then
+            child.Parent = bp
+        end
+    end
+end
+
 function Core.doClicker()
     if VIM then
         VIM:SendMouseButtonEvent(0, 0, 0, true, game, 0)
