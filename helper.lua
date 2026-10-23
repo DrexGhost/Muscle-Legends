@@ -1,5 +1,6 @@
 local Core, GUI = ...
 local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 
 local function build()
     local tab = GUI.makeTab("Helper", 2, "helper")
@@ -127,11 +128,16 @@ local function build()
     local toolMenu = nil
     local menuOpen = false
 
-    local function closeToolMenu()
+    local function closeToolMenu(instant)
         if toolMenu then
             menuOpen = false
             local m = toolMenu
             toolMenu = nil
+            
+            if instant then
+                m:Destroy()
+                return
+            end
             
             local p = m.Position
             local h = m.Size.Y.Offset
@@ -157,7 +163,7 @@ local function build()
 
     local function openToolMenu()
         if not GUI.Main.Visible or not page.Visible then return end
-        closeToolMenu()
+        closeToolMenu(true)
 
         local pos = gearBtn.AbsolutePosition
         local sz = gearBtn.AbsoluteSize
@@ -209,7 +215,7 @@ local function build()
         closeX.AutoButtonColor = false
         closeX.ZIndex = 101
         Instance.new("UICorner", closeX).CornerRadius = UDim.new(0, 5)
-        closeX.MouseButton1Click:Connect(closeToolMenu)
+        closeX.MouseButton1Click:Connect(function() closeToolMenu(false) end)
 
         local list = Instance.new("Frame", toolMenu)
         list.Size = UDim2.new(1, -16, 1, -46)
@@ -298,16 +304,13 @@ local function build()
     end
 
     gearBtn.MouseButton1Click:Connect(function()
-        if menuOpen then closeToolMenu() else openToolMenu() end
+        if menuOpen then closeToolMenu(false) else openToolMenu() end
     end)
 
-    task.spawn(function()
-        while true do
-            task.wait(0.1)
-            if menuOpen and toolMenu then
-                if not GUI.Main.Visible or not page.Visible then
-                    closeToolMenu()
-                end
+    RunService.RenderStepped:Connect(function()
+        if menuOpen and toolMenu then
+            if not page.Visible or not GUI.Main.Visible or GUI.Main.Size.X.Offset < GUI.BASE_W then
+                closeToolMenu(true)
             end
         end
     end)
