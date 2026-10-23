@@ -180,90 +180,29 @@ contentPad.PaddingTop = UDim.new(0, 12)
 contentPad.PaddingBottom = UDim.new(0, 12)
 contentPad.Parent = Content
 
+local ICON_IDS = {
+    dashboard = "83894654139062",
+    helper = "3650695359",
+    farm = "80653163718801",
+    ultimate = "15311960682",
+    motion = "3220768089",
+    combat = "76078853582404",
+    settings = "100589335929927"
+}
+
 local function buildIcon(holder, kind, color)
     for _, c in ipairs(holder:GetChildren()) do c:Destroy() end
-    
-    local base = Instance.new("Frame")
-    base.Size = UDim2.new(0, 16, 0, 16)
-    base.Position = UDim2.new(0, 3, 0.5, -8)
-    base.BackgroundTransparency = 1
-    base.Parent = holder
+    local id = ICON_IDS[kind]
+    if not id then return end
 
-    local function mk(size, pos, z)
-        local f = Instance.new("Frame")
-        f.Size = size
-        f.Position = pos
-        f.BackgroundColor3 = color
-        f.BorderSizePixel = 0
-        f.ZIndex = z or 2
-        f.Parent = base
-        makeCorner(f, 10)
-        return f
-    end
-
-    if kind == "dashboard" then
-        mk(UDim2.new(0, 14, 0, 5), UDim2.new(0, 1, 0, 0), 2)
-        mk(UDim2.new(0, 6, 0, 7), UDim2.new(0, 1, 0, 7), 2)
-        mk(UDim2.new(0, 6, 0, 7), UDim2.new(0, 9, 0, 7), 2)
-    elseif kind == "combat" then
-        local l1 = Instance.new("Frame")
-        l1.Size = UDim2.new(0, 14, 0, 2); l1.AnchorPoint = Vector2.new(0.5, 0.5); l1.Position = UDim2.new(0.5, 0, 0.5, 0); l1.Rotation = 45; l1.BackgroundColor3 = color; l1.BorderSizePixel = 0; l1.Parent = base
-        local l2 = Instance.new("Frame")
-        l2.Size = UDim2.new(0, 14, 0, 2); l2.AnchorPoint = Vector2.new(0.5, 0.5); l2.Position = UDim2.new(0.5, 0, 0.5, 0); l2.Rotation = -45; l2.BackgroundColor3 = color; l2.BorderSizePixel = 0; l2.Parent = base
-    elseif kind == "helper" then
-        local img = Instance.new("ImageLabel")
-        img.Size = UDim2.new(0, 16, 0, 16)
-        img.Position = UDim2.new(0, 0, 0.5, -8)
-        img.BackgroundTransparency = 1
-        img.Image = "rbxassetid://3650695359"
-        img.ImageColor3 = color
-        img.ScaleType = Enum.ScaleType.Fit
-        img.Parent = base
-    elseif kind == "ultimate" then
-        local img = Instance.new("ImageLabel")
-        img.Size = UDim2.new(0, 16, 0, 16)
-        img.Position = UDim2.new(0, 0, 0.5, -8)
-        img.BackgroundTransparency = 1
-        img.Image = "rbxassetid://15311960682"
-        img.ImageColor3 = color
-        img.ScaleType = Enum.ScaleType.Fit
-        img.Parent = base
-    elseif kind == "farm" then
-        local wrapper = Instance.new("Frame")
-        wrapper.Size = UDim2.new(1, 0, 1, 0)
-        wrapper.BackgroundTransparency = 1
-        wrapper.Rotation = 35
-        wrapper.Parent = base
-
-        local function mkSword(size, pos, corner, rot)
-            local f = Instance.new("Frame")
-            f.Size = size
-            f.Position = pos
-            f.AnchorPoint = Vector2.new(0.5, 0.5)
-            f.BackgroundColor3 = color
-            f.BorderSizePixel = 0
-            if rot then f.Rotation = rot end
-            f.Parent = wrapper
-            Instance.new("UICorner", f).CornerRadius = UDim.new(0, corner or 1)
-            return f
-        end
-
-        mkSword(UDim2.new(0, 4, 0, 10), UDim2.new(0.5, 0, 0.5, -1), 1)
-        mkSword(UDim2.new(0, 4, 0, 4), UDim2.new(0.5, 0, 0.5, -6), 1, 45)
-        mkSword(UDim2.new(0, 14, 0, 3), UDim2.new(0.5, 0, 0.5, 4), 1)
-        mkSword(UDim2.new(0, 3, 0, 4), UDim2.new(0.5, 0, 0.5, 7.5), 1)
-        mkSword(UDim2.new(0, 6, 0, 6), UDim2.new(0.5, 0, 0.5, 11.5), 2)
-    elseif kind == "motion" then
-        mk(UDim2.new(0, 12, 0, 2), UDim2.new(0, 1, 0, 3), 1)
-        mk(UDim2.new(0, 8, 0, 2), UDim2.new(0, 1, 0, 7), 1)
-        mk(UDim2.new(0, 4, 0, 2), UDim2.new(0, 1, 0, 11), 1)
-    elseif kind == "settings" then
-        local rows = {{y = 2, x = 9}, {y = 7, x = 4}, {y = 12, x = 11}}
-        for _, l in ipairs(rows) do
-            mk(UDim2.new(0, 14, 0, 2), UDim2.new(0, 1, 0, l.y), 1)
-            mk(UDim2.new(0, 4, 0, 4), UDim2.new(0, l.x, 0, l.y - 1), 2)
-        end
-    end
+    local img = Instance.new("ImageLabel")
+    img.Size = UDim2.new(0, 16, 0, 16)
+    img.Position = UDim2.new(0, 3, 0.5, -8)
+    img.BackgroundTransparency = 1
+    img.Image = "rbxassetid://" .. id
+    img.ImageColor3 = color
+    img.ScaleType = Enum.ScaleType.Fit
+    img.Parent = holder
 end
 
 function GUI.makeTab(text, order, iconKind)
