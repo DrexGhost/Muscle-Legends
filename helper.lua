@@ -53,26 +53,36 @@ local function build()
         end)
     end
 
-    local autoStrHolder = Instance.new("Frame", page)
-    autoStrHolder.Size = UDim2.new(1, 0, 0, 48)
-    autoStrHolder.BackgroundTransparency = 1
-    autoStrHolder.LayoutOrder = 2
+    local autoStrToggle = GUI.makeToggle(page, "Auto Strength ", "Качает: " .. (Core.settings.strengthTool or "Weight"), Core.settings.autoStrength, 2, function(v)
+        Core.settings.autoStrength = v
+        if v then startAutoStr() else safeCancel(autoStrThread) end
+    end, "autoStrength")
 
-    local gearBtn = Instance.new("TextButton", autoStrHolder)
-    gearBtn.Size = UDim2.new(0, 40, 1, 0)
-    gearBtn.Position = UDim2.new(0, 0, 0, 0)
-    gearBtn.BackgroundColor3 = T.card
+    local row = autoStrToggle.Row
+    local nameLbl = autoStrToggle.NameLabel
+    local descLbl = autoStrToggle.DescLabel
+
+    nameLbl.Position = UDim2.new(0, 54, 0, 9)
+    nameLbl.Size = UDim2.new(1, -126, 0, 16)
+    descLbl.Position = UDim2.new(0, 54, 0, 26)
+    descLbl.Size = UDim2.new(1, -126, 0, 14)
+
+    local gearBtn = Instance.new("TextButton", row)
+    gearBtn.Size = UDim2.new(0, 30, 0, 30)
+    gearBtn.Position = UDim2.new(0, 10, 0.5, -15)
+    gearBtn.BackgroundColor3 = T.panelHi
     gearBtn.BorderSizePixel = 0
     gearBtn.Text = "🚀"
-    gearBtn.TextSize = 18
+    gearBtn.TextSize = 15
     gearBtn.Font = Enum.Font.GothamBold
     gearBtn.AutoButtonColor = false
-    gearBtn.ZIndex = 2
-    Instance.new("UICorner", gearBtn).CornerRadius = UDim.new(0, 10)
+    gearBtn.ZIndex = 3
+    Instance.new("UICorner", gearBtn).CornerRadius = UDim.new(0, 7)
+
     local gearStroke = Instance.new("UIStroke", gearBtn)
     gearStroke.Color = T.stroke
     gearStroke.Thickness = 1
-    gearStroke.Transparency = 0.4
+    gearStroke.Transparency = 0.3
     gearStroke.Parent = gearBtn
 
     gearBtn.MouseEnter:Connect(function()
@@ -80,22 +90,9 @@ local function build()
         TweenService:Create(gearStroke, TweenInfo.new(0.15), {Color = T.accent, Transparency = 0.5}):Play()
     end)
     gearBtn.MouseLeave:Connect(function()
-        TweenService:Create(gearBtn, TweenInfo.new(0.15), {BackgroundColor3 = T.card}):Play()
-        TweenService:Create(gearStroke, TweenInfo.new(0.15), {Color = T.stroke, Transparency = 0.4}):Play()
+        TweenService:Create(gearBtn, TweenInfo.new(0.15), {BackgroundColor3 = T.panelHi}):Play()
+        TweenService:Create(gearStroke, TweenInfo.new(0.15), {Color = T.stroke, Transparency = 0.3}):Play()
     end)
-
-    local autoStrToggle = GUI.makeToggle(autoStrHolder, "Auto Strength ", "Качает: " .. (Core.settings.strengthTool or "Weight"), Core.settings.autoStrength, 1, function(v)
-        Core.settings.autoStrength = v
-        if v then startAutoStr() else safeCancel(autoStrThread) end
-    end, "autoStrength")
-
-    for _, child in ipairs(autoStrHolder:GetChildren()) do
-        if child:IsA("TextButton") and child ~= gearBtn then
-            child.Position = UDim2.new(0, 48, 0, 0)
-            child.Size = UDim2.new(1, -48, 0, 48)
-            break
-        end
-    end
 
     local toolMenu = nil
     local menuOpen = false
