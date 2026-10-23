@@ -38,7 +38,7 @@ Core.T = {
 
 Core.settings = {
     menuOpen = true, antiAfk = true, autoStrength = false, autoRebirth = false,
-    autoClicker = false, bossFarm = false, collectChest = false, noclip = false,
+    autoClicker = false, autoSpin = false, bossFarm = false, collectChest = false, noclip = false,
     speed = false, walkSpeed = 50, size = false, sizeValue = 2,
     autoEventFarm = false, eventBosses = {EASY = false, MEDIUM = false, HARD = false, EXTREME = false},
     ultimates = {}, watermark = false, watermarkScale = 100, guiScale = 85,
