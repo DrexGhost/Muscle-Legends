@@ -84,15 +84,15 @@ logoBox.ZIndex = 4
 logoBox.Parent = TopBar
 makeCorner(logoBox, 9)
 
-local logoText = Instance.new("TextLabel")
-logoText.Size = UDim2.new(1, 0, 1, 0)
-logoText.BackgroundTransparency = 1
-logoText.Text = "M"
-logoText.TextColor3 = Color3.fromRGB(10, 14, 24)
-logoText.TextSize = 20
-logoText.Font = Enum.Font.GothamBlack
-logoText.ZIndex = 5
-logoText.Parent = logoBox
+local logoImage = Instance.new("ImageLabel")
+logoImage.Size = UDim2.new(1, -6, 1, -6)
+logoImage.Position = UDim2.new(0.5, 0, 0.5, 0)
+logoImage.AnchorPoint = Vector2.new(0.5, 0.5)
+logoImage.BackgroundTransparency = 1
+logoImage.Image = "rbxassetid://70552604678381"
+logoImage.ScaleType = Enum.ScaleType.Fit
+logoImage.ZIndex = 5
+logoImage.Parent = logoBox
 
 local titleLabel = Instance.new("TextLabel")
 titleLabel.Size = UDim2.new(0, 200, 0, 20)
