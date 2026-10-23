@@ -208,8 +208,30 @@ local function buildIcon(holder, kind, color)
         mk(UDim2.new(0, 4, 0, 14), UDim2.new(0, 6, 0, 1), 2)
         mk(UDim2.new(0, 10, 0, 4), UDim2.new(0, 3, 0, 6), 2)
     elseif kind == "farm" then
-        mk(UDim2.new(0, 12, 0, 12), UDim2.new(0, 2, 0, 2), 1)
-        mk(UDim2.new(0, 4, 0, 4), UDim2.new(0, 6, 0, 6), 2)
+        local wrapper = Instance.new("Frame")
+        wrapper.Size = UDim2.new(1, 0, 1, 0)
+        wrapper.BackgroundTransparency = 1
+        wrapper.Rotation = 35
+        wrapper.Parent = base
+
+        local function mkSword(size, pos, corner, rot)
+            local f = Instance.new("Frame")
+            f.Size = size
+            f.Position = pos
+            f.AnchorPoint = Vector2.new(0.5, 0.5)
+            f.BackgroundColor3 = color
+            f.BorderSizePixel = 0
+            if rot then f.Rotation = rot end
+            f.Parent = wrapper
+            Instance.new("UICorner", f).CornerRadius = UDim.new(0, corner or 1)
+            return f
+        end
+
+        mkSword(UDim2.new(0, 4, 0, 10), UDim2.new(0.5, 0, 0.5, -1), 1)
+        mkSword(UDim2.new(0, 4, 0, 4), UDim2.new(0.5, 0, 0.5, -6), 1, 45)
+        mkSword(UDim2.new(0, 14, 0, 3), UDim2.new(0.5, 0, 0.5, 4), 1)
+        mkSword(UDim2.new(0, 3, 0, 4), UDim2.new(0.5, 0, 0.5, 7.5), 1)
+        mkSword(UDim2.new(0, 6, 0, 6), UDim2.new(0.5, 0, 0.5, 11.5), 2)
     elseif kind == "motion" then
         mk(UDim2.new(0, 12, 0, 2), UDim2.new(0, 1, 0, 3), 1)
         mk(UDim2.new(0, 8, 0, 2), UDim2.new(0, 1, 0, 7), 1)
