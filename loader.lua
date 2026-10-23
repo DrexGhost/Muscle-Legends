@@ -1,3 +1,4 @@
+local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -24,6 +25,7 @@ loadGui.Parent = PlayerGui
 local bgFrame = Instance.new("Frame")
 bgFrame.Size = UDim2.new(1, 0, 1, 0)
 bgFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+bgFrame.BackgroundTransparency = 1
 bgFrame.BorderSizePixel = 0
 bgFrame.Parent = loadGui
 
@@ -35,6 +37,7 @@ logoLbl.Text = "NexusX"
 logoLbl.TextColor3 = Color3.fromRGB(0, 229, 204)
 logoLbl.TextSize = 40
 logoLbl.Font = Enum.Font.GothamBlack
+logoLbl.TextTransparency = 1
 logoLbl.Parent = bgFrame
 
 local statusLbl = Instance.new("TextLabel")
@@ -45,6 +48,7 @@ statusLbl.Text = "Загрузка..."
 statusLbl.TextColor3 = Color3.fromRGB(232, 238, 248)
 statusLbl.TextSize = 14
 statusLbl.Font = Enum.Font.Gotham
+statusLbl.TextTransparency = 1
 statusLbl.Parent = bgFrame
 
 local percentLbl = Instance.new("TextLabel")
@@ -55,12 +59,14 @@ percentLbl.Text = "0%"
 percentLbl.TextColor3 = Color3.fromRGB(0, 229, 204)
 percentLbl.TextSize = 26
 percentLbl.Font = Enum.Font.GothamBold
+percentLbl.TextTransparency = 1
 percentLbl.Parent = bgFrame
 
 local barBg = Instance.new("Frame")
 barBg.Size = UDim2.new(0, 320, 0, 6)
 barBg.Position = UDim2.new(0.5, -160, 0.5, 60)
 barBg.BackgroundColor3 = Color3.fromRGB(30, 38, 62)
+barBg.BackgroundTransparency = 1
 barBg.BorderSizePixel = 0
 barBg.Parent = bgFrame
 Instance.new("UICorner", barBg).CornerRadius = UDim.new(1, 0)
@@ -72,14 +78,27 @@ barFill.BorderSizePixel = 0
 barFill.Parent = barBg
 Instance.new("UICorner", barFill).CornerRadius = UDim.new(1, 0)
 
-local function setProgress(loaded)
-    local pct = math.floor(loaded / total * 100)
-    percentLbl.Text = pct .. "%"
-    barFill.Size = UDim2.new(loaded / total, 0, 1, 0)
-end
+local loadedValue = Instance.new("NumberValue")
+loadedValue.Value = 0
 
-setProgress(0)
-task.wait(0.1)
+loadedValue.Changed:Connect(function(v)
+    percentLbl.Text = math.floor(v / total * 100) .. "%"
+end)
+
+local fadeInInfo = TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+
+TweenService:Create(bgFrame, fadeInInfo, {BackgroundTransparency = 0}):Play()
+TweenService:Create(logoLbl, fadeInInfo, {TextTransparency = 0}):Play()
+TweenService:Create(statusLbl, fadeInInfo, {TextTransparency = 0}):Play()
+TweenService:Create(percentLbl, fadeInInfo, {TextTransparency = 0}):Play()
+TweenService:Create(barBg, fadeInInfo, {BackgroundTransparency = 0}):Play()
+
+task.wait(0.4)
+
+local function setProgress(loaded)
+    TweenService:Create(barFill, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(loaded / total, 0, 1, 0)}):Play()
+    TweenService:Create(loadedValue, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Value = loaded}):Play()
+end
 
 local function httpGet(url)
     if request then
@@ -95,14 +114,13 @@ local sources = {}
 
 for i, name in ipairs(fileList) do
     statusLbl.Text = "Загрузка: " .. name
-    task.wait(0.02)
     sources[name] = httpGet(base .. name)
     setProgress(i)
-    task.wait(0.02)
+    task.wait(0.15)
 end
 
 statusLbl.Text = "Инициализация..."
-task.wait(0.05)
+task.wait(0.2)
 
 local function compile(name, code)
     if not code then return nil end
@@ -145,13 +163,23 @@ for _, name in ipairs(tabs) do
             pcall(build)
         end
     end
-    task.wait(0.02)
+    task.wait(0.05)
 end
 
 pcall(function() GUI.activateFirstTab() end)
 pcall(function() GUI.setOpenState(Core.settings.menuOpen) end)
 
 statusLbl.Text = "Готово!"
-task.wait(0.3)
+task.wait(0.4)
 
+local fadeOutInfo = TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+
+TweenService:Create(bgFrame, fadeOutInfo, {BackgroundTransparency = 1}):Play()
+TweenService:Create(logoLbl, fadeOutInfo, {TextTransparency = 1}):Play()
+TweenService:Create(statusLbl, fadeOutInfo, {TextTransparency = 1}):Play()
+TweenService:Create(percentLbl, fadeOutInfo, {TextTransparency = 1}):Play()
+TweenService:Create(barBg, fadeOutInfo, {BackgroundTransparency = 1}):Play()
+TweenService:Create(barFill, fadeOutInfo, {BackgroundTransparency = 1}):Play()
+
+task.wait(0.45)
 loadGui:Destroy()
