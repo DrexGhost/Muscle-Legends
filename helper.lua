@@ -70,9 +70,7 @@ local function build()
     gearBtn.Position = UDim2.new(1, -92, 0.5, -15)
     gearBtn.BackgroundColor3 = T.panelHi
     gearBtn.BorderSizePixel = 0
-    gearBtn.Text = "🚀"
-    gearBtn.TextSize = 15
-    gearBtn.Font = Enum.Font.GothamBold
+    gearBtn.Text = ""
     gearBtn.AutoButtonColor = false
     gearBtn.ZIndex = 3
     Instance.new("UICorner", gearBtn).CornerRadius = UDim.new(0, 7)
@@ -83,13 +81,47 @@ local function build()
     gearStroke.Transparency = 0.3
     gearStroke.Parent = gearBtn
 
+    local iconHolder = Instance.new("Frame", gearBtn)
+    iconHolder.Size = UDim2.new(0, 16, 0, 16)
+    iconHolder.Position = UDim2.new(0.5, -8, 0.5, -8)
+    iconHolder.BackgroundTransparency = 1
+    iconHolder.ZIndex = 4
+
+    local function drawIconPart(size, pos, z)
+        local f = Instance.new("Frame")
+        f.Size = size
+        f.Position = pos
+        f.BackgroundColor3 = T.text
+        f.BorderSizePixel = 0
+        f.ZIndex = z
+        f.Parent = iconHolder
+        Instance.new("UICorner", f).CornerRadius = UDim.new(1, 0)
+    end
+
+    local rows = {{y = 2, x = 9}, {y = 7, x = 4}, {y = 12, x = 11}}
+    for _, l in ipairs(rows) do
+        drawIconPart(UDim2.new(0, 14, 0, 2), UDim2.new(0, 1, 0, l.y), 4)
+        drawIconPart(UDim2.new(0, 4, 0, 4), UDim2.new(0, l.x, 0, l.y - 1), 5)
+    end
+
     gearBtn.MouseEnter:Connect(function()
         TweenService:Create(gearBtn, TweenInfo.new(0.15), {BackgroundColor3 = T.cardHover}):Play()
         TweenService:Create(gearStroke, TweenInfo.new(0.15), {Color = T.accent, Transparency = 0.5}):Play()
+        for _, child in ipairs(iconHolder:GetChildren()) do
+            if child:IsA("Frame") then
+                TweenService:Create(child, TweenInfo.new(0.15), {BackgroundColor3 = T.accent}):Play()
+            end
+        end
     end)
+
     gearBtn.MouseLeave:Connect(function()
         TweenService:Create(gearBtn, TweenInfo.new(0.15), {BackgroundColor3 = T.panelHi}):Play()
         TweenService:Create(gearStroke, TweenInfo.new(0.15), {Color = T.stroke, Transparency = 0.3}):Play()
+        for _, child in ipairs(iconHolder:GetChildren()) do
+            if child:IsA("Frame") then
+                TweenService:Create(child, TweenInfo.new(0.15), {BackgroundColor3 = T.text}):Play()
+            end
+        end
     end)
 
     local toolMenu = nil
@@ -114,7 +146,7 @@ local function build()
         toolMenu = Instance.new("Frame")
         toolMenu.Name = "StrengthToolMenu"
         toolMenu.Size = UDim2.new(0, 200, 0, menuH)
-        toolMenu.Position = UDim2.new(0, pos.X - 100, 0, yPos)
+        toolMenu.Position = UDim2.new(0, pos.X - 85, 0, yPos)
         toolMenu.BackgroundColor3 = T.panel
         toolMenu.BorderSizePixel = 0
         toolMenu.ZIndex = 100
