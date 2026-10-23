@@ -1,6 +1,7 @@
 local Core, GUI = ...
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
+local RS = game:GetService("ReplicatedStorage")
 
 local function build()
     local tab = GUI.makeTab("Helper", 2, "helper")
@@ -9,7 +10,7 @@ local function build()
 
     GUI.makeSectionHeader(page, "Automation", 1)
 
-    local autoStrThread, autoRebThread, autoClickThread
+    local autoStrThread, autoRebThread, autoClickThread, autoSpinThread
 
     local function safeCancel(t)
         if t then pcall(task.cancel, t) end
@@ -51,6 +52,44 @@ local function build()
             while Core.settings.autoClicker do
                 Core.doClicker()
                 task.wait(0.05)
+            end
+        end)
+    end
+
+    local function startAutoSpin()
+        safeCancel(autoSpinThread)
+        autoSpinThread = task.spawn(function()
+            local failCount = 0
+            while Core.settings.autoSpin do
+                local rEvents = RS:FindFirstChild("rEvents")
+                local wheelRemote = rEvents and rEvents:FindFirstChild("openFortuneWheelRemote")
+                local shared = RS:FindFirstChild("shared")
+                local wheelObj = shared and shared.catalogs and shared.catalogs.fortuneWheelChances and shared.catalogs.fortuneWheelChances:FindFirstChild("Fortune Wheel")
+
+                if wheelRemote and wheelObj then
+                    local ok, result = pcall(function()
+                        if wheelRemote:IsA("RemoteFunction") then
+                            return wheelRemote:InvokeServer("openFortuneWheel", wheelObj)
+                        elseif wheelRemote:IsA("RemoteEvent") then
+                            wheelRemote:FireServer("openFortuneWheel", wheelObj)
+                            return true
+                        end
+                    end)
+
+                    if ok and (type(result) == "table" and result.name or result == true) then
+                        failCount = 0
+                    else
+                        failCount = failCount + 1
+                        if failCount >= 3 then
+                            Core.settings.autoSpin = false
+                            if Core.toggleRefs["autoSpin"] then
+                                Core.toggleRefs["autoSpin"].setEnabled(false, true)
+                            end
+                            break
+                        end
+                    end
+                end
+                task.wait(1)
             end
         end)
     end
@@ -329,9 +368,15 @@ local function build()
         if v then startAutoClick() else safeCancel(autoClickThread) end
     end, "autoClicker")
 
+    GUI.makeToggle(page, "Auto Spin", "Автоматически крутит колесо (раз в 1 сек)", Core.settings.autoSpin, 5, function(v)
+        Core.settings.autoSpin = v
+        if v then startAutoSpin() else safeCancel(autoSpinThread) end
+    end, "autoSpin")
+
     if Core.settings.autoStrength then startAutoStr() end
     if Core.settings.autoRebirth then startAutoReb() end
     if Core.settings.autoClicker then startAutoClick() end
+    if Core.settings.autoSpin then startAutoSpin() end
 
     tab.Button.MouseButton1Click:Connect(function() GUI.switchTab(tab, page) end)
     return tab, page
