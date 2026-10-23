@@ -417,7 +417,7 @@ function GUI.makeToggle(parent, name, desc, default, order, callback, settingNam
     end)
 
     if settingName then Core.toggleRefs[settingName] = { setEnabled = setState } end
-    return { Set = setState, Get = function() return state end, Desc = descLbl }
+    return { Set = setState, Get = function() return state end, Desc = descLbl, Row = row, NameLabel = nameLbl, DescLabel = descLbl }
 end
 
 function GUI.makeSlider(parent, name, min, max, default, order, callback, settingName)
