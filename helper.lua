@@ -146,6 +146,9 @@ local function build()
                 if child:IsA("GuiObject") and child ~= m then
                     TweenService:Create(child, TweenInfo.new(0.15), {BackgroundTransparency = 1, TextTransparency = 1}):Play()
                 end
+                if child:IsA("UIStroke") then
+                    TweenService:Create(child, TweenInfo.new(0.15), {Transparency = 1}):Play()
+                end
             end
 
             task.delay(0.15, function() if m then m:Destroy() end end)
@@ -153,6 +156,7 @@ local function build()
     end
 
     local function openToolMenu()
+        if not GUI.Main.Visible or not page.Visible then return end
         closeToolMenu()
 
         local pos = gearBtn.AbsolutePosition
@@ -163,12 +167,14 @@ local function build()
         local yPos = pos.Y + sz.Y + 4
         if yPos + menuH > viewH then yPos = pos.Y - menuH - 4 end
 
-        toolMenu = Instance.new("Frame")
+        toolMenu = Instance.new("TextButton")
         toolMenu.Name = "StrengthToolMenu"
         toolMenu.Size = UDim2.new(0, 200, 0, 0)
         toolMenu.Position = UDim2.new(0, pos.X - 85, 0, yPos + menuH / 2)
         toolMenu.BackgroundColor3 = T.panel
         toolMenu.BorderSizePixel = 0
+        toolMenu.Text = ""
+        toolMenu.AutoButtonColor = false
         toolMenu.ZIndex = 100
         toolMenu.ClipsDescendants = true
         toolMenu.Parent = GUI.screenGui
@@ -271,7 +277,8 @@ local function build()
                         local p = otherBtn:FindFirstChild("Pill")
                         local k = p and p:FindFirstChild("Knob")
                         if p and k then
-                            local isCurrent = (otherBtn:FindFirstChildOfClass("TextLabel").Text == toolName)
+                            local otherLbl = otherBtn:FindFirstChildOfClass("TextLabel")
+                            local isCurrent = otherLbl and otherLbl.Text == toolName
                             TweenService:Create(p, TweenInfo.new(0.15), {BackgroundColor3 = isCurrent and T.accent or T.toggleOff}):Play()
                             TweenService:Create(k, TweenInfo.new(0.15), {Position = isCurrent and UDim2.new(1, -12, 0.5, -5) or UDim2.new(0, 2, 0.5, -5)}):Play()
                         end
@@ -292,6 +299,17 @@ local function build()
 
     gearBtn.MouseButton1Click:Connect(function()
         if menuOpen then closeToolMenu() else openToolMenu() end
+    end)
+
+    task.spawn(function()
+        while true do
+            task.wait(0.1)
+            if menuOpen and toolMenu then
+                if not GUI.Main.Visible or not page.Visible then
+                    closeToolMenu()
+                end
+            end
+        end
     end)
 
     GUI.makeToggle(page, "Auto Rebirth ", "Автоматическое перерождение", Core.settings.autoRebirth, 3, function(v)
