@@ -54,6 +54,16 @@ Core.settings = {
 
 Core.STRENGTH_TOOLS = {"Weight", "Handstands", "Pushups", "Situps"}
 
+Core.POPULAR_CODES = {
+    "TRICKORTREAT", "overchargedpart2", "MOMENTUM", "ENCHANTED",
+    "BOSSGUARD", "BOSSSTRIKE", "INDUSTRIALGYM500", "MLREVIVED",
+    "frostgems10", "supermuscle100", "galaxycrystal50", "Launch250",
+    "Skyagility50", "Musclestorm50", "speedy50", "spacegems50",
+    "epicreward500", "superpunch100", "megalift50", "MillionWarriors",
+    "junglegym500", "epicmuscle20", "ultimate250", "mightygems2500",
+    "OVERCHARGE", "racer300", "SPEED50",
+}
+
 Core.CHESTS = {
     Vector3.new(-139, 7, -275), Vector3.new(-2569, 7, -556),
     Vector3.new(2208, 7, 912), Vector3.new(-6714, 7, -1459),
@@ -342,6 +352,33 @@ function Core.getUltimateLevel(name)
     if not attr then return 0 end
     local v = LocalPlayer:GetAttribute(attr)
     return typeof(v) == "number" and v or 0
+end
+
+function Core.redeemAllCodes(onProgress, onDone)
+    if not rEvents then
+        if onDone then onDone(false) end
+        return
+    end
+    local codeRemote = rEvents:FindFirstChild("codeRemote")
+    if not codeRemote then
+        if onDone then onDone(false) end
+        return
+    end
+
+    task.spawn(function()
+        for i, code in ipairs(Core.POPULAR_CODES) do
+            if onProgress then onProgress(i, #Core.POPULAR_CODES, code) end
+            pcall(function()
+                if codeRemote:IsA("RemoteFunction") then
+                    codeRemote:InvokeServer(code)
+                elseif codeRemote:IsA("RemoteEvent") then
+                    codeRemote:FireServer(code)
+                end
+            end)
+            task.wait(0.6)
+        end
+        if onDone then onDone(true) end
+    end)
 end
 
 Core.loadSettings()
