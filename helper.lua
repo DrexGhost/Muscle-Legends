@@ -21,6 +21,7 @@ local function build()
             while Core.settings.autoStrength do
                 if Core.Char and Core.Char:FindFirstChildOfClass("Humanoid") then
                     local targetName = Core.settings.strengthTool or "Weight"
+                    Core.unequipOtherTools(targetName)
                     if not Core.hasTool(targetName) then
                         Core.equipTool(targetName)
                     end
