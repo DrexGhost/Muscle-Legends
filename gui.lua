@@ -123,7 +123,7 @@ closeBtn.Size = UDim2.new(0, 32, 0, 32)
 closeBtn.Position = UDim2.new(1, -44, 0.5, -16)
 closeBtn.BackgroundColor3 = T.panelHi
 closeBtn.BorderSizePixel = 0
-closeBtn.Image = "rbxassetid://130204466652123"
+closeBtn.Image = "rbxassetid://2923552991"
 closeBtn.ImageColor3 = T.textDim
 closeBtn.ScaleType = Enum.ScaleType.Fit
 closeBtn.AutoButtonColor = false
@@ -182,6 +182,7 @@ contentPad.Parent = Content
 
 local function buildIcon(holder, kind, color)
     for _, c in ipairs(holder:GetChildren()) do c:Destroy() end
+    
     local base = Instance.new("Frame")
     base.Size = UDim2.new(0, 16, 0, 16)
     base.Position = UDim2.new(0, 3, 0.5, -8)
@@ -210,30 +211,23 @@ local function buildIcon(holder, kind, color)
         local l2 = Instance.new("Frame")
         l2.Size = UDim2.new(0, 14, 0, 2); l2.AnchorPoint = Vector2.new(0.5, 0.5); l2.Position = UDim2.new(0.5, 0, 0.5, 0); l2.Rotation = -45; l2.BackgroundColor3 = color; l2.BorderSizePixel = 0; l2.Parent = base
     elseif kind == "helper" then
-        local wrapper = Instance.new("Frame")
-        wrapper.Size = UDim2.new(1, 0, 1, 0)
-        wrapper.BackgroundTransparency = 1
-        wrapper.Parent = base
-
-        local function mkDb(size, posX, posY, corner)
-            local f = Instance.new("Frame")
-            f.Size = size
-            f.AnchorPoint = Vector2.new(0.5, 0.5)
-            f.Position = UDim2.new(0.5, posX, 0.5, posY)
-            f.BackgroundColor3 = color
-            f.BorderSizePixel = 0
-            f.Parent = wrapper
-            Instance.new("UICorner", f).CornerRadius = UDim.new(0, corner)
-            return f
-        end
-
-        mkDb(UDim2.new(0, 8, 0, 2), 0, 0, 1)
-        mkDb(UDim2.new(0, 2, 0, 4), -9, 0, 1)
-        mkDb(UDim2.new(0, 2, 0, 4), 9, 0, 1)
-        mkDb(UDim2.new(0, 3, 0, 8), -7, 0, 1)
-        mkDb(UDim2.new(0, 3, 0, 8), 7, 0, 1)
-        mkDb(UDim2.new(0, 4, 0, 10), -4, 0, 1)
-        mkDb(UDim2.new(0, 4, 0, 10), 4, 0, 1)
+        local img = Instance.new("ImageLabel")
+        img.Size = UDim2.new(0, 16, 0, 16)
+        img.Position = UDim2.new(0, 0, 0.5, -8)
+        img.BackgroundTransparency = 1
+        img.Image = "rbxassetid://3650695359"
+        img.ImageColor3 = color
+        img.ScaleType = Enum.ScaleType.Fit
+        img.Parent = base
+    elseif kind == "ultimate" then
+        local img = Instance.new("ImageLabel")
+        img.Size = UDim2.new(0, 16, 0, 16)
+        img.Position = UDim2.new(0, 0, 0.5, -8)
+        img.BackgroundTransparency = 1
+        img.Image = "rbxassetid://15311960682"
+        img.ImageColor3 = color
+        img.ScaleType = Enum.ScaleType.Fit
+        img.Parent = base
     elseif kind == "farm" then
         local wrapper = Instance.new("Frame")
         wrapper.Size = UDim2.new(1, 0, 1, 0)
