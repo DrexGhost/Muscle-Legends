@@ -13,7 +13,7 @@ wmScreenGui.Name = "NexusWatermark"
 wmScreenGui.ResetOnSpawn = false
 wmScreenGui.IgnoreGuiInset = true
 wmScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-wmScreenGui.DisplayOrder = 500
+wmScreenGui.DisplayOrder = 999
 wmScreenGui.Parent = PlayerGui
 
 local wmRoot = Instance.new("Frame")
