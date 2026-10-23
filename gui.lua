@@ -118,25 +118,30 @@ versionLabel.TextXAlignment = Enum.TextXAlignment.Left
 versionLabel.ZIndex = 4
 versionLabel.Parent = TopBar
 
-local closeBtn = Instance.new("TextButton")
+local closeBtn = Instance.new("ImageButton")
 closeBtn.Size = UDim2.new(0, 32, 0, 32)
 closeBtn.Position = UDim2.new(1, -44, 0.5, -16)
 closeBtn.BackgroundColor3 = T.panelHi
 closeBtn.BorderSizePixel = 0
-closeBtn.Text = "×"
-closeBtn.TextColor3 = T.textDim
-closeBtn.TextSize = 20
-closeBtn.Font = Enum.Font.GothamBold
+closeBtn.Image = "rbxassetid://130204466652123"
+closeBtn.ImageColor3 = T.textDim
+closeBtn.ScaleType = Enum.ScaleType.Fit
 closeBtn.AutoButtonColor = false
 closeBtn.ZIndex = 4
 closeBtn.Parent = TopBar
 makeCorner(closeBtn, 7)
 
+local closePad = Instance.new("UIPadding", closeBtn)
+closePad.PaddingTop = UDim.new(0, 8)
+closePad.PaddingBottom = UDim.new(0, 8)
+closePad.PaddingLeft = UDim.new(0, 8)
+closePad.PaddingRight = UDim.new(0, 8)
+
 closeBtn.MouseEnter:Connect(function()
-    TweenService:Create(closeBtn, TweenInfo.new(0.15), {BackgroundColor3 = T.danger, TextColor3 = Color3.fromRGB(255, 255, 255)}):Play()
+    TweenService:Create(closeBtn, TweenInfo.new(0.15), {BackgroundColor3 = T.danger, ImageColor3 = Color3.fromRGB(255, 255, 255)}):Play()
 end)
 closeBtn.MouseLeave:Connect(function()
-    TweenService:Create(closeBtn, TweenInfo.new(0.15), {BackgroundColor3 = T.panelHi, TextColor3 = T.textDim}):Play()
+    TweenService:Create(closeBtn, TweenInfo.new(0.15), {BackgroundColor3 = T.panelHi, ImageColor3 = T.textDim}):Play()
 end)
 
 local Sidebar = Instance.new("Frame")
