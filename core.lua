@@ -38,6 +38,7 @@ Core.T = {
 
 Core.settings = {
     menuOpen = true, antiAfk = true, autoStrength = false, autoRebirth = false,
+    limitedRebirth = false, rebirthLimit = 1000,
     autoClicker = false, autoSpin = false, bossFarm = false, collectChest = false, noclip = false,
     speed = false, walkSpeed = 50, size = false, sizeValue = 2,
     autoEventFarm = false, eventBosses = {EASY = false, MEDIUM = false, HARD = false, EXTREME = false},
