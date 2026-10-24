@@ -434,12 +434,18 @@ local function build()
 
         local rebMenu = nil
         local menuOpen = false
+        local limitBoxRef = nil
+        local pillLimitRef = nil
+        local knobLimitRef = nil
 
         local function closeRebMenu(instant)
             if rebMenu then
                 menuOpen = false
                 local m = rebMenu
                 rebMenu = nil
+                limitBoxRef = nil
+                pillLimitRef = nil
+                knobLimitRef = nil
                 if instant then
                     m:Destroy()
                     return
@@ -524,8 +530,6 @@ local function build()
             content.BackgroundTransparency = 1
             content.ZIndex = 101
 
-            local limitBox
-            
             local rowLimit = Instance.new("TextButton")
             rowLimit.Size = UDim2.new(1, 0, 0, 40)
             rowLimit.BackgroundColor3 = T.card
@@ -577,17 +581,21 @@ local function build()
             knobLimit.ZIndex = 104
             Instance.new("UICorner", knobLimit).CornerRadius = UDim.new(1, 0)
 
-            rowLimit.MouseButton1Click:Connect(function()
-                local newState = not Core.settings.limitedRebirth
-                Core.settings.limitedRebirth = newState
-                Core.saveSetting("limitedRebirth", newState)
-                
-                TweenService:Create(pillLimit, TweenInfo.new(0.2), {BackgroundColor3 = newState and T.accent or T.toggleOff}):Play()
-                TweenService:Create(knobLimit, TweenInfo.new(0.22, Enum.EasingStyle.Back), {Position = newState and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7)}):Play()
-                
-                if limitBox then
-                    limitBox.Visible = newState
+            pillLimitRef = pillLimit
+            knobLimitRef = knobLimit
+
+            local function updateLimitUI()
+                TweenService:Create(pillLimit, TweenInfo.new(0.2), {BackgroundColor3 = Core.settings.limitedRebirth and T.accent or T.toggleOff}):Play()
+                TweenService:Create(knobLimit, TweenInfo.new(0.22, Enum.EasingStyle.Back), {Position = Core.settings.limitedRebirth and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7)}):Play()
+                if limitBoxRef then
+                    limitBoxRef.Visible = Core.settings.limitedRebirth
                 end
+            end
+
+            rowLimit.MouseButton1Click:Connect(function()
+                Core.settings.limitedRebirth = not Core.settings.limitedRebirth
+                Core.saveSetting("limitedRebirth", Core.settings.limitedRebirth)
+                updateLimitUI()
             end)
 
             rowLimit.MouseEnter:Connect(function()
@@ -599,36 +607,59 @@ local function build()
                 TweenService:Create(rowLimitStroke, TweenInfo.new(0.15), {Color = T.stroke, Transparency = 0.4}):Play()
             end)
 
-            limitBox = Instance.new("TextBox", content)
-            limitBox.Size = UDim2.new(1, 0, 0, 32)
-            limitBox.Position = UDim2.new(0, 0, 0, 48)
-            limitBox.BackgroundColor3 = T.card
-            limitBox.BorderSizePixel = 0
-            limitBox.Text = tostring(Core.settings.rebirthLimit or "")
-            limitBox.PlaceholderText = "Введите число"
-            limitBox.PlaceholderColor3 = T.textMuted
-            limitBox.TextColor3 = T.text
-            limitBox.TextSize = 12
-            limitBox.Font = Enum.Font.Gotham
-            limitBox.TextXAlignment = Enum.TextXAlignment.Left
-            limitBox.ClearTextOnFocus = false
-            limitBox.Visible = Core.settings.limitedRebirth
-            limitBox.ZIndex = 102
-            Instance.new("UICorner", limitBox).CornerRadius = UDim.new(0, 8)
-            local pad = Instance.new("UIPadding", limitBox)
+            limitBoxRef = Instance.new("TextBox", content)
+            limitBoxRef.Size = UDim2.new(1, 0, 0, 32)
+            limitBoxRef.Position = UDim2.new(0, 0, 0, 48)
+            limitBoxRef.BackgroundColor3 = T.card
+            limitBoxRef.BorderSizePixel = 0
+            limitBoxRef.Text = tostring(Core.settings.rebirthLimit or "")
+            limitBoxRef.PlaceholderText = "Введите число"
+            limitBoxRef.PlaceholderColor3 = T.textMuted
+            limitBoxRef.TextColor3 = T.text
+            limitBoxRef.TextSize = 12
+            limitBoxRef.Font = Enum.Font.Gotham
+            limitBoxRef.TextXAlignment = Enum.TextXAlignment.Left
+            limitBoxRef.ClearTextOnFocus = false
+            limitBoxRef.Visible = Core.settings.limitedRebirth
+            limitBoxRef.ZIndex = 102
+            Instance.new("UICorner", limitBoxRef).CornerRadius = UDim.new(0, 8)
+            local pad = Instance.new("UIPadding", limitBoxRef)
             pad.PaddingLeft = UDim.new(0, 10)
 
-            limitBox.FocusLost:Connect(function()
-                local num = tonumber(limitBox.Text)
+            limitBoxRef:GetPropertyChangedSignal("Text"):Connect(function()
+                local txt = limitBoxRef.Text
+                Core.settings.rebirthLimit = txt
+                Core.saveSetting("rebirthLimit", txt)
+            end)
+            
+            limitBoxRef.FocusLost:Connect(function()
+                local num = tonumber(limitBoxRef.Text)
                 if num and num > 0 then
                     Core.settings.rebirthLimit = math.floor(num)
                     Core.saveSetting("rebirthLimit", Core.settings.rebirthLimit)
-                    limitBox.Text = tostring(Core.settings.rebirthLimit)
+                    limitBoxRef.Text = tostring(Core.settings.rebirthLimit)
                 else
                     Core.settings.rebirthLimit = ""
                     Core.saveSetting("rebirthLimit", "")
-                    limitBox.Text = ""
+                    limitBoxRef.Text = ""
                 end
+            end)
+
+            local oldRefresh = Core.toggleRefs["limitedRebirth"]
+            Core.toggleRefs["limitedRebirth"] = {
+                setEnabled = function(v, silent)
+                    if pillLimitRef and knobLimitRef then
+                        updateLimitUI()
+                    end
+                    if limitBoxRef then
+                        limitBoxRef.Text = tostring(Core.settings.rebirthLimit or "")
+                    end
+                end
+            }
+
+            closeX.MouseButton1Click:Connect(function() 
+                closeRebMenu(false)
+                if oldRefresh then Core.toggleRefs["limitedRebirth"] = oldRefresh end
             end)
 
             TweenService:Create(rebMenu, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
