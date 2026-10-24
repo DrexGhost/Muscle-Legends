@@ -32,7 +32,7 @@ local function build()
                         pcall(function() tool:Activate() end)
                     end
                 end
-                task.wait(0.15)
+                task.wait(0.01)
             end
         end)
     end
@@ -65,7 +65,7 @@ local function build()
         autoClickThread = task.spawn(function()
             while Core.settings.autoClicker do
                 Core.doClicker()
-                task.wait(0.05)
+                task.wait(0.01)
             end
         end)
     end
@@ -631,7 +631,7 @@ local function build()
                 Core.settings.rebirthLimit = txt
                 Core.saveSetting("rebirthLimit", txt)
             end)
-            
+
             limitBoxRef.FocusLost:Connect(function()
                 local num = tonumber(limitBoxRef.Text)
                 if num and num > 0 then
@@ -657,7 +657,7 @@ local function build()
                 end
             }
 
-            closeX.MouseButton1Click:Connect(function() 
+            closeX.MouseButton1Click:Connect(function()
                 closeRebMenu(false)
                 if oldRefresh then Core.toggleRefs["limitedRebirth"] = oldRefresh end
             end)
