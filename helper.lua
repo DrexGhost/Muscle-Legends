@@ -524,12 +524,11 @@ local function build()
             content.BackgroundTransparency = 1
             content.ZIndex = 101
 
+            local limitBox
             local limitToggle = GUI.makeToggle(content, "Limited Rebirth", "Остановить при достижении", Core.settings.limitedRebirth, 1, function(v)
                 Core.settings.limitedRebirth = v
-                if v then
-                    limitBox.Visible = true
-                else
-                    limitBox.Visible = false
+                if limitBox then
+                    limitBox.Visible = v
                 end
             end, "limitedRebirth")
             
@@ -540,13 +539,13 @@ local function build()
                 limitToggle.Row.Parent = content
             end
 
-            local limitBox = Instance.new("TextBox", content)
+            limitBox = Instance.new("TextBox", content)
             limitBox.Size = UDim2.new(1, 0, 0, 32)
             limitBox.Position = UDim2.new(0, 0, 0, 48)
             limitBox.BackgroundColor3 = T.card
             limitBox.BorderSizePixel = 0
-            limitBox.Text = tostring(Core.settings.rebirthLimit or 1000)
-            limitBox.PlaceholderText = "Лимит (напр. 1000)"
+            limitBox.Text = tostring(Core.settings.rebirthLimit or "")
+            limitBox.PlaceholderText = "Введите число"
             limitBox.PlaceholderColor3 = T.textMuted
             limitBox.TextColor3 = T.text
             limitBox.TextSize = 12
@@ -566,7 +565,9 @@ local function build()
                     Core.saveSetting("rebirthLimit", Core.settings.rebirthLimit)
                     limitBox.Text = tostring(Core.settings.rebirthLimit)
                 else
-                    limitBox.Text = tostring(Core.settings.rebirthLimit or 1000)
+                    Core.settings.rebirthLimit = ""
+                    Core.saveSetting("rebirthLimit", "")
+                    limitBox.Text = ""
                 end
             end)
 
