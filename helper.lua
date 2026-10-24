@@ -525,19 +525,79 @@ local function build()
             content.ZIndex = 101
 
             local limitBox
-            local limitToggle = GUI.makeToggle(content, "Limited Rebirth", "Остановить при достижении", Core.settings.limitedRebirth, 1, function(v)
-                Core.settings.limitedRebirth = v
-                if limitBox then
-                    limitBox.Visible = v
-                end
-            end, "limitedRebirth")
             
-            if limitToggle.Row then
-                limitToggle.Row.Size = UDim2.new(1, 0, 0, 40)
-                limitToggle.NameLabel.Position = UDim2.new(0, 10, 0, 4)
-                limitToggle.DescLabel.Position = UDim2.new(0, 10, 0, 20)
-                limitToggle.Row.Parent = content
-            end
+            local rowLimit = Instance.new("TextButton")
+            rowLimit.Size = UDim2.new(1, 0, 0, 40)
+            rowLimit.BackgroundColor3 = T.card
+            rowLimit.BorderSizePixel = 0
+            rowLimit.Text = ""
+            rowLimit.AutoButtonColor = false
+            rowLimit.ZIndex = 101
+            rowLimit.Parent = content
+            Instance.new("UICorner", rowLimit).CornerRadius = UDim.new(0, 10)
+            local rowLimitStroke = Instance.new("UIStroke", rowLimit)
+            rowLimitStroke.Color = T.stroke
+            rowLimitStroke.Thickness = 1
+            rowLimitStroke.Transparency = 0.4
+            rowLimitStroke.Parent = rowLimit
+
+            local nameLimit = Instance.new("TextLabel", rowLimit)
+            nameLimit.Size = UDim2.new(1, -70, 0, 16)
+            nameLimit.Position = UDim2.new(0, 10, 0, 4)
+            nameLimit.BackgroundTransparency = 1
+            nameLimit.Text = "Limited Rebirth "
+            nameLimit.TextColor3 = T.text
+            nameLimit.TextSize = 13
+            nameLimit.Font = Enum.Font.GothamBold
+            nameLimit.TextXAlignment = Enum.TextXAlignment.Left
+
+            local descLimit = Instance.new("TextLabel", rowLimit)
+            descLimit.Size = UDim2.new(1, -70, 0, 14)
+            descLimit.Position = UDim2.new(0, 10, 0, 20)
+            descLimit.BackgroundTransparency = 1
+            descLimit.Text = "Автоотключение перерождения"
+            descLimit.TextColor3 = T.textMuted
+            descLimit.TextSize = 10
+            descLimit.Font = Enum.Font.Gotham
+            descLimit.TextXAlignment = Enum.TextXAlignment.Left
+
+            local pillLimit = Instance.new("Frame", rowLimit)
+            pillLimit.Size = UDim2.new(0, 32, 0, 18)
+            pillLimit.Position = UDim2.new(1, -44, 0.5, -9)
+            pillLimit.BackgroundColor3 = Core.settings.limitedRebirth and T.accent or T.toggleOff
+            pillLimit.BorderSizePixel = 0
+            pillLimit.ZIndex = 103
+            Instance.new("UICorner", pillLimit).CornerRadius = UDim.new(1, 0)
+
+            local knobLimit = Instance.new("Frame", pillLimit)
+            knobLimit.Size = UDim2.new(0, 14, 0, 14)
+            knobLimit.Position = Core.settings.limitedRebirth and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7)
+            knobLimit.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            knobLimit.BorderSizePixel = 0
+            knobLimit.ZIndex = 104
+            Instance.new("UICorner", knobLimit).CornerRadius = UDim.new(1, 0)
+
+            rowLimit.MouseButton1Click:Connect(function()
+                local newState = not Core.settings.limitedRebirth
+                Core.settings.limitedRebirth = newState
+                Core.saveSetting("limitedRebirth", newState)
+                
+                TweenService:Create(pillLimit, TweenInfo.new(0.2), {BackgroundColor3 = newState and T.accent or T.toggleOff}):Play()
+                TweenService:Create(knobLimit, TweenInfo.new(0.22, Enum.EasingStyle.Back), {Position = newState and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7)}):Play()
+                
+                if limitBox then
+                    limitBox.Visible = newState
+                end
+            end)
+
+            rowLimit.MouseEnter:Connect(function()
+                TweenService:Create(rowLimit, TweenInfo.new(0.15), {BackgroundColor3 = T.cardHover}):Play()
+                TweenService:Create(rowLimitStroke, TweenInfo.new(0.15), {Color = T.accent, Transparency = 0.5}):Play()
+            end)
+            rowLimit.MouseLeave:Connect(function()
+                TweenService:Create(rowLimit, TweenInfo.new(0.15), {BackgroundColor3 = T.card}):Play()
+                TweenService:Create(rowLimitStroke, TweenInfo.new(0.15), {Color = T.stroke, Transparency = 0.4}):Play()
+            end)
 
             limitBox = Instance.new("TextBox", content)
             limitBox.Size = UDim2.new(1, 0, 0, 32)
