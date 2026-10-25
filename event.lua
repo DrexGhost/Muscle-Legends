@@ -156,11 +156,9 @@ local function build()
     local BOX_Z = -4205
     local FINISH_X = -14538
     local FINISH_STOP_X = FINISH_X - 5
+    local FINISH_BACK_X = -14530
     local HURDLES_X = {-12947, -13007, -13067, -13127, -13187, -13247, -13307}
-    local CLICK_ZONES = {
-        {name = "HeavyLift",  minX = -13780, maxX = -13830},
-        {name = "ArmWrestle", minX = -13940, maxX = -13995},
-    }
+    local LANE_Z_LIST = {-4129, -4143, -4157, -4172, -4186, -4200, -4214, -4229, -4243, -4257}
 
     local raceState = false
     local raceActive = false
@@ -172,14 +170,33 @@ local function build()
     local lastJumpTime = 0
     local lastClickTime = 0
 
-    local function attach()
+    local finishAttempts = 0
+    local finishPhase = "going"
+    local finishPhaseStart = 0
+
+    local lastBoxTpTime = 0
+    local boxWiggled = false
+    local inBoxWiggle = false
+
+    local getCurrentLane = function()
+        if not Core.HRP then return 1 end
+        local z = Core.HRP.Position.Z
+        local best, bestDiff = 1, math.huge
+        for i, lz in ipairs(LANE_Z_LIST) do
+            local d = math.abs(z - lz)
+            if d < bestDiff then bestDiff = d; best = i end
+        end
+        return best
+    end
+
+    local attach = function()
         if not Core.Char then return false end
         attachedHRP = Core.HRP
         attachedHum = Core.Hum
         return attachedHRP ~= nil and attachedHum ~= nil
     end
 
-    local function isReallyVisible(obj)
+    local isReallyVisible = function(obj)
         local cur = obj
         while cur and cur ~= game do
             if cur:IsA("GuiObject") and not cur.Visible then return false end
@@ -188,7 +205,7 @@ local function build()
         return true
     end
 
-    local function findVisibleText(targetText)
+    local findVisibleText = function(targetText)
         for _, gui in ipairs(PlayerGui:GetChildren()) do
             if gui:IsA("ScreenGui") and gui.Name ~= "NexusML_UI" and gui.Name ~= "NexusWatermark" then
                 for _, desc in ipairs(gui:GetDescendants()) do
@@ -201,7 +218,7 @@ local function build()
         return nil
     end
 
-    local function endCurrentRace()
+    local endCurrentRace = function()
         raceActive = false
         if raceConn then raceConn:Disconnect(); raceConn = nil end
         if bodyVel then bodyVel:Destroy(); bodyVel = nil end
@@ -210,15 +227,41 @@ local function build()
             attachedHum.AutoRotate = true
         end
         pcall(function() VIM:SendMouseButtonEvent(0, 0, 0, false, game, 0) end)
+        finishAttempts = 0
+        finishPhase = "going"
     end
 
-    local function startRaceLoop()
+    local doBoxWiggle = function()
+        if inBoxWiggle then return end
+        inBoxWiggle = true
+        if not attachedHRP or not attachedHRP.Parent then inBoxWiggle = false; return end
+
+        for i = 1, 10 do
+            if not inBoxWiggle or not attachedHRP or not attachedHRP.Parent then return end
+            attachedHRP.AssemblyLinearVelocity = Vector3.new(-25, 0, 0)
+            task.wait(0.02)
+        end
+        for i = 1, 10 do
+            if not inBoxWiggle or not attachedHRP or not attachedHRP.Parent then return end
+            attachedHRP.AssemblyLinearVelocity = Vector3.new(25, 0, 0)
+            task.wait(0.02)
+        end
+        if attachedHRP and attachedHRP.Parent then
+            attachedHRP.AssemblyLinearVelocity = Vector3.zero
+        end
+        inBoxWiggle = false
+    end
+
+    local startRaceLoop = function()
         if raceActive then return end
         if not attach() then return end
 
         raceActive = true
         lastJumpTime = 0
         lastClickTime = 0
+        finishAttempts = 0
+        finishPhase = "going"
+        finishPhaseStart = 0
 
         bodyVel = Instance.new("BodyVelocity")
         bodyVel.Name = "AutoRaceVelocity"
@@ -242,14 +285,118 @@ local function build()
             local floor = attachedHum.FloorMaterial
             local ws = attachedHum.WalkSpeed
 
-            if pos.X <= FINISH_STOP_X then
-                endCurrentRace()
+            if finishPhase == "going" and pos.X <= FINISH_STOP_X then
+                finishPhase = "checking"
+                finishPhaseStart = now
+                if bodyVel then bodyVel.Velocity = Vector3.zero end
+                attachedHum:Move(Vector3.new(0, 0, 0))
                 return
+            end
+
+            if finishPhase == "checking" then
+                if pos.X > LOBBY_X then
+                    endCurrentRace()
+                    return
+                end
+                if now - finishPhaseStart > 2.0 then
+                    finishAttempts = finishAttempts + 1
+
+                    if finishAttempts >= 3 then
+                        endCurrentRace()
+                        if Core.Char then
+                            local hum = Core.Char:FindFirstChildOfClass("Humanoid")
+                            if hum then pcall(function() hum.Health = 0 end) end
+                        end
+                        return
+                    else
+                        finishPhase = "rolling_back"
+                        finishPhaseStart = now
+                    end
+                end
+                return
+            end
+
+            if finishPhase == "rolling_back" then
+                if pos.X >= FINISH_BACK_X or now - finishPhaseStart > 3.0 then
+                    finishPhase = "going"
+                    finishPhaseStart = now
+                else
+                    if bodyVel then
+                        bodyVel.Velocity = Vector3.new(math.max(ws, 20), 0, 0)
+                    end
+                    attachedHum.AutoRotate = false
+                    attachedHum:Move(Vector3.new(1, 0, 0))
+                    return
+                end
             end
 
             if pos.X > LOBBY_X then
                 endCurrentRace()
                 return
+            end
+
+            if pos.X <= -13350 and pos.X > -13675 then
+                local laneNum = getCurrentLane()
+                local laneName = string.format("Lane%02d", laneNum)
+                local gym = workspace:FindFirstChild("StrongbloxianGym")
+                local course = gym and gym:FindFirstChild("Course")
+                local lanes = course and course:FindFirstChild("Lanes")
+                local lane = lanes and lanes:FindFirstChild(laneName)
+                local segs = lane and lane:FindFirstChild("Segments")
+                local sledSeg = segs and segs:FindFirstChild("02_HeavySled")
+                local sled = sledSeg and sledSeg:FindFirstChild("Sled")
+
+                if sled and sled.Parent then
+                    local runner = sled:GetAttribute("StrongbloxianSledRunner")
+                    local isRunner = (tostring(runner) == tostring(LocalPlayer.UserId))
+                    if not isRunner then
+                        if bodyVel then bodyVel.Velocity = Vector3.new(-ws, 0, 0) end
+                        attachedHum.AutoRotate = false
+                        attachedHum:Move(Vector3.new(-1, 0, 0))
+                        return
+                    end
+                end
+            end
+
+            if pos.X <= -13675 and pos.X > -13885 then
+                local laneNum = getCurrentLane()
+                local laneName = string.format("Lane%02d", laneNum)
+                local gym = workspace:FindFirstChild("StrongbloxianGym")
+                local course = gym and gym:FindFirstChild("Course")
+                local lanes = course and course:FindFirstChild("Lanes")
+                local lane = lanes and lanes:FindFirstChild(laneName)
+                local segs = lane and lane:FindFirstChild("Segments")
+                local liftSeg = segs and segs:FindFirstChild("03_HeavyLift")
+                local barbell = liftSeg and liftSeg:FindFirstChild("Barbell")
+
+                local nearBarbell = false
+                if barbell then
+                    local barPos = barbell:GetPivot().Position
+                    local dist = (Vector3.new(pos.X, 0, pos.Z) - Vector3.new(barPos.X, 0, barPos.Z)).Magnitude
+                    if dist < 10 then nearBarbell = true end
+                end
+
+                if nearBarbell then
+                    if now - lastClickTime > 0.03 then
+                        lastClickTime = now
+                        local vp = workspace.CurrentCamera.ViewportSize
+                        pcall(function()
+                            VIM:SendMouseButtonEvent(vp.X/2, vp.Y/2, 0, true, game, 0)
+                            VIM:SendMouseButtonEvent(vp.X/2, vp.Y/2, 0, false, game, 0)
+                        end)
+                    end
+                end
+            end
+
+            if pos.X <= -13885 and pos.X > -14125 then
+                if now - lastClickTime > 0.03 then
+                    lastClickTime = now
+                    local vp = workspace.CurrentCamera.ViewportSize
+                    pcall(function()
+                        VIM:SendMouseButtonEvent(vp.X/2, vp.Y/2, 0, true, game, 0)
+                        VIM:SendMouseButtonEvent(vp.X/2, vp.Y/2, 0, false, game, 0)
+                    end)
+                end
             end
 
             if bodyVel then
@@ -258,22 +405,6 @@ local function build()
 
             attachedHum.AutoRotate = false
             attachedHum:Move(Vector3.new(-1, 0, 0))
-
-            local inClickZone = false
-            for _, zone in ipairs(CLICK_ZONES) do
-                if pos.X <= zone.minX and pos.X >= zone.maxX then
-                    inClickZone = true
-                    break
-                end
-            end
-            if inClickZone and now - lastClickTime > 0.05 then
-                lastClickTime = now
-                local vp = workspace.CurrentCamera.ViewportSize
-                pcall(function()
-                    VIM:SendMouseButtonEvent(vp.X/2, vp.Y/2, 0, true, game, 0)
-                    VIM:SendMouseButtonEvent(vp.X/2, vp.Y/2, 0, false, game, 0)
-                end)
-            end
 
             for _, hX in ipairs(HURDLES_X) do
                 local dist = pos.X - hX
@@ -289,17 +420,21 @@ local function build()
         end)
     end
 
-    local function stopRace()
+    local stopRace = function()
         raceState = false
         if raceCheckThread then
             pcall(task.cancel, raceCheckThread)
             raceCheckThread = nil
         end
+        inBoxWiggle = false
         endCurrentRace()
     end
 
-    local function startRace()
+    local startRace = function()
         raceState = true
+        lastBoxTpTime = 0
+        boxWiggled = false
+        inBoxWiggle = false
         if raceCheckThread then pcall(task.cancel, raceCheckThread) end
         raceCheckThread = task.spawn(function()
             while raceState do
@@ -314,9 +449,22 @@ local function build()
                                 Core.HRP.CFrame = CFrame.new(BOX_X, 6, BOX_Z)
                                 Core.HRP.AssemblyLinearVelocity = Vector3.zero
                                 Core.HRP.AssemblyAngularVelocity = Vector3.zero
+                                lastBoxTpTime = os.clock()
+                                boxWiggled = false
+                                inBoxWiggle = false
+                                attachedHRP = Core.HRP
+                                attachedHum = Core.Hum
+                            else
+                                if not boxWiggled and lastBoxTpTime > 0 and (os.clock() - lastBoxTpTime) > 1.0 then
+                                    boxWiggled = true
+                                    task.spawn(doBoxWiggle)
+                                end
                             end
                         end
                     else
+                        inBoxWiggle = false
+                        lastBoxTpTime = 0
+                        boxWiggled = false
                         if not raceActive then
                             startRaceLoop()
                         end
