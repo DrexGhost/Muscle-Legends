@@ -17,20 +17,33 @@ local function build()
         if t then pcall(task.cancel, t) end
     end
 
+    local function ensureToolEquipped(targetName)
+        if not Core.Char or not Core.Char.Parent then return nil end
+        local tool = Core.Char:FindFirstChild(targetName)
+        if tool and tool:IsA("Tool") then return tool end
+        local bp = LocalPlayer:FindFirstChild("Backpack")
+        if not bp then return nil end
+        local bpTool = bp:FindFirstChild(targetName)
+        if not bpTool or not bpTool:IsA("Tool") then return nil end
+        for _, c in ipairs(Core.Char:GetChildren()) do
+            if c:IsA("Tool") and c ~= bpTool then
+                c.Parent = bp
+            end
+        end
+        bpTool.Parent = Core.Char
+        return Core.Char:FindFirstChild(targetName)
+    end
+
     local function startAutoStr()
         safeCancel(autoStrThread)
         autoStrThread = task.spawn(function()
             while Core.settings.autoStrength do
-                if Core.Char and Core.Char:FindFirstChildOfClass("Humanoid") then
+                if Core.Char and Core.Char.Parent and Core.Hum and Core.Hum.Parent then
+                    local targetName = Core.settings.strengthTool or "Weight"
+                    local tool = ensureToolEquipped(targetName)
                     if Core.settings.strengthUseMode == "rep" then
                         Core.doRep()
                     else
-                        local targetName = Core.settings.strengthTool or "Weight"
-                        Core.unequipOtherTools(targetName)
-                        if not Core.hasTool(targetName) then
-                            Core.equipTool(targetName)
-                        end
-                        local tool = Core.Char:FindFirstChild(targetName)
                         if tool and tool:IsA("Tool") then
                             pcall(function() tool:Activate() end)
                         end
