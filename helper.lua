@@ -22,21 +22,21 @@ local function build()
         autoStrThread = task.spawn(function()
             while Core.settings.autoStrength do
                 if Core.Char and Core.Char:FindFirstChildOfClass("Humanoid") then
-                    local targetName = Core.settings.strengthTool or "Weight"
-                    Core.unequipOtherTools(targetName)
-                    if not Core.hasTool(targetName) then
-                        Core.equipTool(targetName)
-                    end
                     if Core.settings.strengthUseMode == "rep" then
                         Core.doRep()
                     else
+                        local targetName = Core.settings.strengthTool or "Weight"
+                        Core.unequipOtherTools(targetName)
+                        if not Core.hasTool(targetName) then
+                            Core.equipTool(targetName)
+                        end
                         local tool = Core.Char:FindFirstChild(targetName)
                         if tool and tool:IsA("Tool") then
                             pcall(function() tool:Activate() end)
                         end
                     end
                 end
-                task.wait(0.01)
+                RunService.Heartbeat:Wait()
             end
         end)
     end
