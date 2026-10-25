@@ -199,6 +199,11 @@ function Core.loadSettings()
                     if sOk then Core.settings[name] = decoded end
                 elseif type(defaultValue) == type(stored.Value) then
                     Core.settings[name] = stored.Value
+                elseif name == "rebirthLimit" then
+                    local st = type(stored.Value)
+                    if st == "string" or st == "number" then
+                        Core.settings[name] = stored.Value
+                    end
                 end
             end
         end
@@ -264,9 +269,17 @@ function Core.loadConfigFrom(name)
     local ok2, decoded = pcall(function() return HttpService:JSONDecode(contents) end)
     if not ok2 or type(decoded) ~= "table" then return false end
     for k, v in pairs(decoded) do
-        if Core.settings[k] ~= nil and type(Core.settings[k]) == type(v) then
-            Core.settings[k] = v
-            Core.saveSetting(k, v)
+        if Core.settings[k] ~= nil then
+            if type(Core.settings[k]) == type(v) then
+                Core.settings[k] = v
+                Core.saveSetting(k, v)
+            elseif k == "rebirthLimit" then
+                local vt = type(v)
+                if vt == "string" or vt == "number" then
+                    Core.settings[k] = v
+                    Core.saveSetting(k, v)
+                end
+            end
         end
     end
     return true
