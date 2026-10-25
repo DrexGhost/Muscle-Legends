@@ -222,10 +222,9 @@ local function build()
             local cPos = GUI.Content.AbsolutePosition
             local cSize = GUI.Content.AbsoluteSize
             local menuW = 200
-            local menuH = 168 + 38 * #Core.STRENGTH_TOOLS
+            local menuH = 200
             local targetX = cPos.X + (cSize.X / 2) - (menuW / 2)
-            local targetY = cPos.Y + (cSize.Y - menuH) / 2
-            if targetY < cPos.Y then targetY = cPos.Y end
+            local targetY = cPos.Y + (cSize.Y / 2) - (menuH / 2)
 
             toolMenu = Instance.new("TextButton")
             toolMenu.Name = "StrengthToolMenu"
@@ -271,15 +270,26 @@ local function build()
             Instance.new("UICorner", closeX).CornerRadius = UDim.new(0, 5)
             closeX.MouseButton1Click:Connect(function() closeToolMenu(false) end)
 
-            local list = Instance.new("Frame", toolMenu)
-            list.Size = UDim2.new(1, -16, 1, -46)
+            local list = Instance.new("ScrollingFrame", toolMenu)
+            list.Size = UDim2.new(1, -16, 1, -48)
             list.Position = UDim2.new(0, 8, 0, 40)
             list.BackgroundTransparency = 1
+            list.BorderSizePixel = 0
+            list.CanvasSize = UDim2.new(0, 0, 0, 0)
+            list.AutomaticCanvasSize = Enum.AutomaticSize.Y
+            list.ScrollBarThickness = 3
+            list.ScrollBarImageColor3 = T.accent
+            list.ScrollBarImageTransparency = 0.4
+            list.ScrollingDirection = Enum.ScrollingDirection.Y
             list.ZIndex = 101
 
             local ll = Instance.new("UIListLayout", list)
             ll.Padding = UDim.new(0, 4)
             ll.SortOrder = Enum.SortOrder.LayoutOrder
+
+            local listPad = Instance.new("UIPadding", list)
+            listPad.PaddingBottom = UDim.new(0, 4)
+            listPad.PaddingRight = UDim.new(0, 2)
 
             local function addMenuLabel(text, order)
                 local lbl = Instance.new("TextLabel", list)
