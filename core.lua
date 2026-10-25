@@ -51,6 +51,7 @@ Core.settings = {
     strengthTool = "Weight",
     strengthTool_Weight = true, strengthTool_Handstands = false,
     strengthTool_Pushups = false, strengthTool_Situps = false,
+    strengthUseMode = "default",
 }
 
 Core.STRENGTH_TOOLS = {"Weight", "Handstands", "Pushups", "Situps"}
@@ -339,6 +340,9 @@ function Core.doRebirth()
         local rr = rEvents:FindFirstChild("rebirthRemote")
         if rr then pcall(function() rr:InvokeServer("rebirthRequest") end) end
     end
+end
+
+function Core.doRep()
 end
 
 function Core.upgradeUltimate(name)
