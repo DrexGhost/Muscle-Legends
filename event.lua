@@ -1,5 +1,9 @@
 local Core, GUI = ...
 local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local VIM = game:GetService("VirtualInputManager")
 
 local function build()
     local tab = GUI.makeTab("Event", 6, "combat")
@@ -141,6 +145,193 @@ local function build()
         if now - lastAttack >= 0.4 then
             lastAttack = now
             Core.punch()
+        end
+    end)
+
+    GUI.makeSectionHeader(page, "New Event (Race)", order)
+    order = order + 1
+
+    local LOBBY_X = -12850
+    local BOX_X = -12850
+    local BOX_Z = -4205
+    local FINISH_X = -14538
+    local FINISH_STOP_X = FINISH_X - 5
+    local HURDLES_X = {-12947, -13007, -13067, -13127, -13187, -13247, -13307}
+    local CLICK_ZONES = {
+        {name = "HeavyLift",  minX = -13780, maxX = -13830},
+        {name = "ArmWrestle", minX = -13940, maxX = -13995},
+    }
+
+    local raceState = false
+    local raceActive = false
+    local attachedHRP = nil
+    local attachedHum = nil
+    local raceConn = nil
+    local raceCheckThread = nil
+    local bodyVel = nil
+    local lastJumpTime = 0
+    local lastClickTime = 0
+
+    local function attach()
+        if not Core.Char then return false end
+        attachedHRP = Core.HRP
+        attachedHum = Core.Hum
+        return attachedHRP ~= nil and attachedHum ~= nil
+    end
+
+    local function isReallyVisible(obj)
+        local cur = obj
+        while cur and cur ~= game do
+            if cur:IsA("GuiObject") and not cur.Visible then return false end
+            cur = cur.Parent
+        end
+        return true
+    end
+
+    local function findVisibleText(targetText)
+        for _, gui in ipairs(PlayerGui:GetChildren()) do
+            if gui:IsA("ScreenGui") and gui.Name ~= "NexusML_UI" and gui.Name ~= "NexusWatermark" then
+                for _, desc in ipairs(gui:GetDescendants()) do
+                    if desc:IsA("TextLabel") and desc.Text == targetText then
+                        if isReallyVisible(desc) then return desc end
+                    end
+                end
+            end
+        end
+        return nil
+    end
+
+    local function endCurrentRace()
+        raceActive = false
+        if raceConn then raceConn:Disconnect(); raceConn = nil end
+        if bodyVel then bodyVel:Destroy(); bodyVel = nil end
+        if attachedHum then
+            pcall(function() attachedHum:Move(Vector3.new(0, 0, 0)) end)
+            attachedHum.AutoRotate = true
+        end
+        pcall(function() VIM:SendMouseButtonEvent(0, 0, 0, false, game, 0) end)
+    end
+
+    local function startRaceLoop()
+        if raceActive then return end
+        if not attach() then return end
+
+        raceActive = true
+        lastJumpTime = 0
+        lastClickTime = 0
+
+        bodyVel = Instance.new("BodyVelocity")
+        bodyVel.Name = "AutoRaceVelocity"
+        bodyVel.MaxForce = Vector3.new(math.huge, 0, math.huge)
+        bodyVel.Velocity = Vector3.new(-25, 0, 0)
+        bodyVel.Parent = attachedHRP
+
+        raceConn = RunService.Heartbeat:Connect(function()
+            if not raceActive then return end
+            if not attachedHRP or not attachedHRP.Parent or not attachedHum then
+                if not attach() then return end
+                if bodyVel then bodyVel:Destroy() end
+                bodyVel = Instance.new("BodyVelocity")
+                bodyVel.MaxForce = Vector3.new(math.huge, 0, math.huge)
+                bodyVel.Velocity = Vector3.new(-25, 0, 0)
+                bodyVel.Parent = attachedHRP
+            end
+
+            local now = os.clock()
+            local pos = attachedHRP.Position
+            local floor = attachedHum.FloorMaterial
+            local ws = attachedHum.WalkSpeed
+
+            if pos.X <= FINISH_STOP_X then
+                endCurrentRace()
+                return
+            end
+
+            if pos.X > LOBBY_X then
+                endCurrentRace()
+                return
+            end
+
+            if bodyVel then
+                bodyVel.Velocity = Vector3.new(-math.max(ws, 0), 0, 0)
+            end
+
+            attachedHum.AutoRotate = false
+            attachedHum:Move(Vector3.new(-1, 0, 0))
+
+            local inClickZone = false
+            for _, zone in ipairs(CLICK_ZONES) do
+                if pos.X <= zone.minX and pos.X >= zone.maxX then
+                    inClickZone = true
+                    break
+                end
+            end
+            if inClickZone and now - lastClickTime > 0.05 then
+                lastClickTime = now
+                local vp = workspace.CurrentCamera.ViewportSize
+                pcall(function()
+                    VIM:SendMouseButtonEvent(vp.X/2, vp.Y/2, 0, true, game, 0)
+                    VIM:SendMouseButtonEvent(vp.X/2, vp.Y/2, 0, false, game, 0)
+                end)
+            end
+
+            for _, hX in ipairs(HURDLES_X) do
+                local dist = pos.X - hX
+                if dist > 0 and dist < 7 then
+                    if floor ~= Enum.Material.Air and now - lastJumpTime > 0.4 then
+                        attachedHum:ChangeState(Enum.HumanoidStateType.Jumping)
+                        attachedHum.Jump = true
+                        lastJumpTime = now
+                    end
+                    break
+                end
+            end
+        end)
+    end
+
+    local function stopRace()
+        raceState = false
+        if raceCheckThread then
+            pcall(task.cancel, raceCheckThread)
+            raceCheckThread = nil
+        end
+        endCurrentRace()
+    end
+
+    local function startRace()
+        raceState = true
+        if raceCheckThread then pcall(task.cancel, raceCheckThread) end
+        raceCheckThread = task.spawn(function()
+            while raceState do
+                if Core.HRP then
+                    local raceLive = findVisibleText("RACE LIVE")
+                    local stepHint = findVisibleText("STEP IN THE BOX TO RACE")
+                    local raceWaiting = raceLive ~= nil or stepHint ~= nil
+
+                    if raceWaiting then
+                        if not raceActive then
+                            if Core.HRP.Position.X > LOBBY_X then
+                                Core.HRP.CFrame = CFrame.new(BOX_X, 6, BOX_Z)
+                                Core.HRP.AssemblyLinearVelocity = Vector3.zero
+                                Core.HRP.AssemblyAngularVelocity = Vector3.zero
+                            end
+                        end
+                    else
+                        if not raceActive then
+                            startRaceLoop()
+                        end
+                    end
+                end
+                task.wait(0.3)
+            end
+        end)
+    end
+
+    GUI.makeToggle(page, "Auto Race (Beta)", "Автоматическое прохождение гонки", false, order, function(v)
+        if v then
+            startRace()
+        else
+            stopRace()
         end
     end)
 
