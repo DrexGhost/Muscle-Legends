@@ -343,6 +343,10 @@ function Core.doRebirth()
 end
 
 function Core.doRep()
+    local remote = LocalPlayer:FindFirstChild("muscleEvent")
+    if remote and remote:IsA("RemoteEvent") then
+        pcall(function() remote:FireServer("rep") end)
+    end
 end
 
 function Core.upgradeUltimate(name)
