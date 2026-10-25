@@ -218,7 +218,11 @@ local function build()
                 }):Play()
                 for _, child in ipairs(m:GetDescendants()) do
                     if child:IsA("GuiObject") and child ~= m then
-                        TweenService:Create(child, TweenInfo.new(0.15), {BackgroundTransparency = 1, TextTransparency = 1}):Play()
+                        local props = {BackgroundTransparency = 1}
+                        if child:IsA("TextLabel") or child:IsA("TextButton") or child:IsA("TextBox") then
+                            props.TextTransparency = 1
+                        end
+                        TweenService:Create(child, TweenInfo.new(0.15), props):Play()
                     end
                     if child:IsA("UIStroke") then
                         TweenService:Create(child, TweenInfo.new(0.15), {Transparency = 1}):Play()
@@ -540,7 +544,11 @@ local function build()
                 }):Play()
                 for _, child in ipairs(m:GetDescendants()) do
                     if child:IsA("GuiObject") and child ~= m then
-                        TweenService:Create(child, TweenInfo.new(0.15), {BackgroundTransparency = 1, TextTransparency = 1}):Play()
+                        local props = {BackgroundTransparency = 1}
+                        if child:IsA("TextLabel") or child:IsA("TextButton") or child:IsA("TextBox") then
+                            props.TextTransparency = 1
+                        end
+                        TweenService:Create(child, TweenInfo.new(0.15), props):Play()
                     end
                     if child:IsA("UIStroke") then
                         TweenService:Create(child, TweenInfo.new(0.15), {Transparency = 1}):Play()
