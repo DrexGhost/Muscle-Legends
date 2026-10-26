@@ -155,7 +155,7 @@ if not GUI then
     return
 end
 
-local eggsFn = compile("helper/eggs.lua", sources["helper/eggs.lua"])
+local eggsFn = run("helper/eggs.lua", compile("helper/eggs.lua", sources["helper/eggs.lua"]))
 local helperFn = compile("helper/helper.lua", sources["helper/helper.lua"])
 
 local tabs = {
