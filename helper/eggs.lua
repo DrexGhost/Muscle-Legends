@@ -4,7 +4,7 @@ local RS = game:GetService("ReplicatedStorage")
 
 return function(Core, GUI, page, startOrder)
     local T = Core.T
-    local order = startOrder
+    local order = startOrder or 6
     local eggThread = nil
     local toolMenu = nil
     local menuOpen = false
