@@ -170,7 +170,7 @@ return function(Core, GUI, page, startOrder)
             header.Size = UDim2.new(1, -40, 0, 26)
             header.Position = UDim2.new(0, 12, 0, 8)
             header.BackgroundTransparency = 1
-            header.Text = "Select Eggs"
+            header.Text = "Select Egg"
             header.TextColor3 = T.text
             header.TextSize = 12
             header.Font = Enum.Font.GothamBold
@@ -211,6 +211,16 @@ return function(Core, GUI, page, startOrder)
             local listPad = Instance.new("UIPadding", list)
             listPad.PaddingBottom = UDim.new(0, 4)
             listPad.PaddingRight = UDim.new(0, 2)
+
+            local eggRefs = {}
+
+            local function updateVisuals()
+                for name, ref in pairs(eggRefs) do
+                    local isCurrent = Core.settings.hatchEggsSelected[name] == true
+                    TweenService:Create(ref.Pill, TweenInfo.new(0.15), {BackgroundColor3 = isCurrent and T.accent or T.toggleOff}):Play()
+                    TweenService:Create(ref.Knob, TweenInfo.new(0.15), {Position = isCurrent and UDim2.new(1, -12, 0.5, -5) or UDim2.new(0, 2, 0.5, -5)}):Play()
+                end
+            end
 
             local mOrder = 1
             for _, eggName in ipairs(Core.EGGS_LIST) do
@@ -254,14 +264,16 @@ return function(Core, GUI, page, startOrder)
                 knob.ZIndex = 104
                 Instance.new("UICorner", knob).CornerRadius = UDim.new(1, 0)
 
+                eggRefs[eggName] = { Pill = pill, Knob = knob }
+
                 btn.MouseButton1Click:Connect(function()
                     local currentState = Core.settings.hatchEggsSelected[eggName] == true
-                    Core.settings.hatchEggsSelected[eggName] = not currentState
+                    Core.settings.hatchEggsSelected = {}
+                    if not currentState then
+                        Core.settings.hatchEggsSelected[eggName] = true
+                    end
                     Core.saveSetting("hatchEggsSelected", Core.settings.hatchEggsSelected)
-                    
-                    local newState = Core.settings.hatchEggsSelected[eggName]
-                    TweenService:Create(pill, TweenInfo.new(0.15), {BackgroundColor3 = newState and T.accent or T.toggleOff}):Play()
-                    TweenService:Create(knob, TweenInfo.new(0.15), {Position = newState and UDim2.new(1, -12, 0.5, -5) or UDim2.new(0, 2, 0.5, -5)}):Play()
+                    updateVisuals()
                 end)
                 mOrder = mOrder + 1
             end
