@@ -55,6 +55,7 @@ Core.settings = {
     hatchEggs = false,
     hatchEggsSelected = {},
     autoEvo = false,
+}
 
 Core.STRENGTH_TOOLS = {"Weight", "Handstands", "Pushups", "Situps"}
 
@@ -85,7 +86,7 @@ Core.CHESTS = {
     Vector3.new(-139, 7, -275), Vector3.new(-2569, 7, -556),
     Vector3.new(2208, 7, 912), Vector3.new(-6714, 7, -1459),
     Vector3.new(4667, 1000, -3694), Vector3.new(-7915, 41, 3026),
-    Vector3.new(-4757, 99, 5580), Vector3.new(-2297, 195, 5506),
+    Vector3.new(-4757, 99, 5580),
 }
 
 Core.BOSS_HEIGHTS = {
