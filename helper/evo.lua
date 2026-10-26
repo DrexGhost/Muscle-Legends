@@ -1,7 +1,7 @@
 local RS = game:GetService("ReplicatedStorage")
 
 return function(Core, GUI, page, startOrder)
-    local order = startOrder
+    local order = startOrder or 7
     local evoThread = nil
 
     local function startEvo()
