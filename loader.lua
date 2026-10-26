@@ -6,8 +6,9 @@ local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local base = "https://raw.githubusercontent.com/DrexGhost/Muscle-Legends/main/"
 
 local fileList = {
-    "core.lua", "gui.lua", "main.lua", "helper.lua", "farm.lua",
-    "ultimate.lua", "movement.lua", "event.lua", "settings.lua"
+    "core.lua", "gui.lua", "main.lua", 
+    "helper/helper.lua", "helper/eggs.lua", 
+    "farm.lua", "ultimate.lua", "movement.lua", "event.lua", "settings.lua"
 }
 local total = #fileList
 
@@ -154,11 +155,23 @@ if not GUI then
     return
 end
 
-local tabs = {"main.lua", "helper.lua", "farm.lua", "ultimate.lua", "movement.lua", "event.lua", "settings.lua"}
-for _, name in ipairs(tabs) do
-    local fn = compile(name, sources[name])
+local eggsFn = compile("helper/eggs.lua", sources["helper/eggs.lua"])
+local helperFn = compile("helper/helper.lua", sources["helper/helper.lua"])
+
+local tabs = {
+    {name = "main.lua", fn = compile("main.lua", sources["main.lua"])},
+    {name = "helper/helper.lua", fn = helperFn, extra = eggsFn},
+    {name = "farm.lua", fn = compile("farm.lua", sources["farm.lua"])},
+    {name = "ultimate.lua", fn = compile("ultimate.lua", sources["ultimate.lua"])},
+    {name = "movement.lua", fn = compile("movement.lua", sources["movement.lua"])},
+    {name = "event.lua", fn = compile("event.lua", sources["event.lua"])},
+    {name = "settings.lua", fn = compile("settings.lua", sources["settings.lua"])}
+}
+
+for _, tabInfo in ipairs(tabs) do
+    local fn = tabInfo.fn
     if fn then
-        local ok, build = pcall(fn, Core, GUI)
+        local ok, build = pcall(fn, Core, GUI, tabInfo.extra)
         if ok and type(build) == "function" then
             pcall(build)
         end
