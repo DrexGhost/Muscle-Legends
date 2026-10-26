@@ -301,4 +301,6 @@ return function(Core, GUI, page, startOrder)
     if Core.settings.hatchEggs then
         startHatching()
     end
+
+    return order + 1
 end
