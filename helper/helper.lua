@@ -1,4 +1,4 @@
-local Core, GUI, eggsFn = ...
+local Core, GUI, eggsFn, evoFn = ...
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local RS = game:GetService("ReplicatedStorage")
@@ -781,8 +781,14 @@ local function build()
     if Core.settings.autoClicker then startAutoClick() end
     if Core.settings.autoSpin then startAutoSpin() end
 
+    local nextOrder = 6
+
     if eggsFn then
-        eggsFn(Core, GUI, page, 6)
+        nextOrder = eggsFn(Core, GUI, page, nextOrder)
+    end
+
+    if evoFn then
+        nextOrder = evoFn(Core, GUI, page, nextOrder)
     end
 
     tab.Button.MouseButton1Click:Connect(function() GUI.switchTab(tab, page) end)
