@@ -7,7 +7,7 @@ local base = "https://raw.githubusercontent.com/DrexGhost/Muscle-Legends/main/"
 
 local fileList = {
     "core.lua", "gui.lua", "main.lua", 
-    "helper/helper.lua", "helper/eggs.lua", 
+    "helper/helper.lua", "helper/eggs.lua", "helper/evo.lua",
     "farm.lua", "ultimate.lua", "movement.lua", "event.lua", "settings.lua"
 }
 local total = #fileList
@@ -156,11 +156,12 @@ if not GUI then
 end
 
 local eggsFn = run("helper/eggs.lua", compile("helper/eggs.lua", sources["helper/eggs.lua"]))
+local evoFn = run("helper/evo.lua", compile("helper/evo.lua", sources["helper/evo.lua"]))
 local helperFn = compile("helper/helper.lua", sources["helper/helper.lua"])
 
 local tabs = {
     {name = "main.lua", fn = compile("main.lua", sources["main.lua"])},
-    {name = "helper/helper.lua", fn = helperFn, extra = eggsFn},
+    {name = "helper/helper.lua", fn = helperFn, extra = eggsFn, extra2 = evoFn},
     {name = "farm.lua", fn = compile("farm.lua", sources["farm.lua"])},
     {name = "ultimate.lua", fn = compile("ultimate.lua", sources["ultimate.lua"])},
     {name = "movement.lua", fn = compile("movement.lua", sources["movement.lua"])},
@@ -171,7 +172,7 @@ local tabs = {
 for _, tabInfo in ipairs(tabs) do
     local fn = tabInfo.fn
     if fn then
-        local ok, build = pcall(fn, Core, GUI, tabInfo.extra)
+        local ok, build = pcall(fn, Core, GUI, tabInfo.extra, tabInfo.extra2)
         if ok and type(build) == "function" then
             pcall(build)
         end
