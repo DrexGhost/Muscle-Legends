@@ -43,7 +43,6 @@ local function build()
         {name = "Legends Gym", coords = Vector3.new(4629, 991, -3896)},
         {name = "Jungle Gym", coords = Vector3.new(-8706, 6, 2387)},
         {name = "Industrial Gym", coords = Vector3.new(-5545, 60, 4941)},
-        {name = "Electro Gym", coords = Vector3.new(-3134, 168, 4999)},
     }
 
     local order = 9
