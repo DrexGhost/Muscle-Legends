@@ -21,7 +21,7 @@ return function(Core, GUI, page, startOrder)
         end)
     end
 
-    GUI.makeToggle(page, "Auto Evo", "Автоматическая эволюция питомца", Core.settings.autoEvo, order, function(v)
+    GUI.makeToggle(page, "Auto Evo (beta)", "Автоматическая эволюция питомца", Core.settings.autoEvo, order, function(v)
         Core.settings.autoEvo = v
         if v then startEvo() else
             if evoThread then pcall(task.cancel, evoThread) end
