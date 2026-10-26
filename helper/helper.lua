@@ -784,11 +784,11 @@ local function build()
     local nextOrder = 6
 
     if eggsFn then
-        nextOrder = eggsFn(Core, GUI, page, nextOrder)
+        nextOrder = eggsFn(Core, GUI, page, nextOrder) or nextOrder
     end
 
     if evoFn then
-        nextOrder = evoFn(Core, GUI, page, nextOrder)
+        nextOrder = evoFn(Core, GUI, page, nextOrder) or nextOrder
     end
 
     tab.Button.MouseButton1Click:Connect(function() GUI.switchTab(tab, page) end)
