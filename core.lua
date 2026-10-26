@@ -52,9 +52,24 @@ Core.settings = {
     strengthTool_Weight = true, strengthTool_Handstands = false,
     strengthTool_Pushups = false, strengthTool_Situps = false,
     strengthUseMode = "default",
+    hatchEggs = false,
+    hatchEggsSelected = {},
 }
 
 Core.STRENGTH_TOOLS = {"Weight", "Handstands", "Pushups", "Situps"}
+
+Core.EGGS_LIST = {
+    "Blue Crystal",
+    "Green Crystal",
+    "Frost Crystal",
+    "Mythical Crystal",
+    "Inferno Crystal",
+    "Legends Crystal",
+    "Muscle Elite Crystal",
+    "Galaxy Oracle Crystal",
+    "Jungle Crystal",
+    "Industrial Crystal",
+}
 
 Core.POPULAR_CODES = {
     "TRICKORTREAT", "overchargedpart2", "MOMENTUM", "ENCHANTED",
