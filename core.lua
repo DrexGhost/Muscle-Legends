@@ -54,7 +54,7 @@ Core.settings = {
     strengthUseMode = "default",
     hatchEggs = false,
     hatchEggsSelected = {},
-}
+    autoEvo = false,
 
 Core.STRENGTH_TOOLS = {"Weight", "Handstands", "Pushups", "Situps"}
 
