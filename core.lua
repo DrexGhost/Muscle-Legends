@@ -344,18 +344,27 @@ end
 
 function Core.punch()
     if not Core.Char then return end
-    local tool = Core.Char:FindFirstChildOfClass("Tool")
-    if tool then
-        pcall(function() tool:Activate() end)
-    else
-        local bp = LocalPlayer:FindFirstChild("Backpack")
-        if bp then
-            local p = bp:FindFirstChild("Punch")
-            if p then
-                p.Parent = Core.Char
-                task.wait(0.1)
-                pcall(function() p:Activate() end)
+    local bp = LocalPlayer:FindFirstChild("Backpack")
+    
+    local punchTool = Core.Char:FindFirstChild("Punch")
+    if not punchTool and bp then
+        punchTool = bp:FindFirstChild("Punch")
+    end
+    
+    if punchTool then
+        for _, child in ipairs(Core.Char:GetChildren()) do
+            if child:IsA("Tool") and child ~= punchTool then
+                if bp then child.Parent = bp end
             end
+        end
+        if punchTool.Parent ~= Core.Char then
+            punchTool.Parent = Core.Char
+        end
+        pcall(function() punchTool:Activate() end)
+    else
+        local fallbackTool = Core.Char:FindFirstChildOfClass("Tool")
+        if fallbackTool then
+            pcall(function() fallbackTool:Activate() end)
         end
     end
 end
