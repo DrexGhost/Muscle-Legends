@@ -75,13 +75,12 @@ Core.EGGS_LIST = {
 }
 
 Core.POPULAR_CODES = {
-    "TRICKORTREAT", "overchargedpart2", "MOMENTUM", "ENCHANTED",
+    "TRICKORTREAT", "MOMENTUM", "ENCHANTED",
     "BOSSGUARD", "BOSSSTRIKE", "INDUSTRIALGYM500", "MLREVIVED",
     "frostgems10", "supermuscle100", "galaxycrystal50", "Launch250",
     "Skyagility50", "Musclestorm50", "speedy50", "spacegems50",
     "epicreward500", "superpunch100", "megalift50", "MillionWarriors",
     "junglegym500", "epicmuscle20", "ultimate250", "mightygems2500",
-    "OVERCHARGE", "racer300", "SPEED50",
 }
 
 Core.CHESTS = {
