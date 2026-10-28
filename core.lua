@@ -11,6 +11,7 @@ local Core = {}
 
 Core.CONFIG_FOLDER = "MuscleLegendsConfigs"
 Core.RETURN_POS = Vector3.new(-16.9, 36.3, -1243.5)
+Core.EVENT_RETURN_POS = Vector3.new(5558, 85, 5838)
 
 Core.T = {
     bg1 = Color3.fromRGB(14, 18, 32),
@@ -172,12 +173,13 @@ function Core.findGroundPos(fromPos)
     return nil
 end
 
-function Core.stopFarm()
+function Core.stopFarm(targetPos)
     if not Core.HRP or not Core.Hum then return end
     Core.HRP.AssemblyLinearVelocity = Vector3.zero
     Core.HRP.AssemblyAngularVelocity = Vector3.zero
 
-    local target = Core.findGroundPos(Core.HRP.Position) or Core.findGroundPos(Core.RETURN_POS) or Core.RETURN_POS
+    local tPos = targetPos or Core.RETURN_POS
+    local target = Core.findGroundPos(Core.HRP.Position) or Core.findGroundPos(tPos) or tPos
     Core.HRP.CFrame = CFrame.new(target)
 
     if Core.NoclipActive then
@@ -189,11 +191,12 @@ function Core.stopFarm()
     Core.Hum.AutoRotate = true
 end
 
-function Core.returnToBase()
+function Core.returnToBase(targetPos)
     if not Core.HRP then return end
     Core.HRP.AssemblyLinearVelocity = Vector3.zero
     Core.HRP.AssemblyAngularVelocity = Vector3.zero
-    local target = Core.findGroundPos(Core.RETURN_POS) or Core.RETURN_POS
+    local tPos = targetPos or Core.RETURN_POS
+    local target = Core.findGroundPos(tPos) or tPos
     Core.HRP.CFrame = CFrame.new(target)
 end
 
