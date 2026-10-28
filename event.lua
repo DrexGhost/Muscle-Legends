@@ -44,7 +44,7 @@ local function build()
                 end
                 if not any then
                     Core.settings.autoEventFarm = false
-                    Core.stopFarm()
+                    Core.stopFarm(Core.EVENT_RETURN_POS)
                 end
             end
             Core.saveSetting("eventBosses", Core.settings.eventBosses)
@@ -97,7 +97,7 @@ local function build()
             local outOfWorld = not currentBossPart.Parent or currentBossPart.Position.Y <= 0
 
             if not stillEnabled or outOfWorld then
-                if bossWasAlive then Core.returnToBase() end
+                if bossWasAlive then Core.returnToBase(Core.EVENT_RETURN_POS) end
                 currentBossModel, currentBossPart, bossWasAlive, currentBossName = nil, nil, false, nil
             else
                 local hp = currentBossModel:GetAttribute("Health") or currentBossPart:GetAttribute("Health")
@@ -105,7 +105,7 @@ local function build()
                     bossWasAlive = true
                 elseif hp and hp <= 0 then
                     if bossWasAlive then
-                        Core.returnToBase()
+                        Core.returnToBase(Core.EVENT_RETURN_POS)
                         currentBossModel, currentBossPart, bossWasAlive, currentBossName = nil, nil, false, nil
                     end
                 end
