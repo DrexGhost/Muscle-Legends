@@ -96,8 +96,10 @@ local function build()
             local stillEnabled = currentBossName ~= nil and Core.settings.eventBosses[currentBossName] == true
             local outOfWorld = not currentBossPart.Parent or currentBossPart.Position.Y <= 0
 
-            if not stillEnabled or outOfWorld then
+            if not stillEnabled then
                 if bossWasAlive then Core.returnToBase(Core.EVENT_RETURN_POS) end
+                currentBossModel, currentBossPart, bossWasAlive, currentBossName = nil, nil, false, nil
+            elseif outOfWorld then
                 currentBossModel, currentBossPart, bossWasAlive, currentBossName = nil, nil, false, nil
             else
                 local hp = currentBossModel:GetAttribute("Health") or currentBossPart:GetAttribute("Health")
