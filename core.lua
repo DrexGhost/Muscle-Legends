@@ -46,7 +46,7 @@ Core.settings = {
     ultimates = {}, watermark = false, watermarkScale = 100, guiScale = 85,
     floatBtnSize = 58, floatBtnPos = {0, 20, 0.5, 0},
     bossHeight1 = 143, bossHeight2 = 143, bossHeight3 = 143,
-    bossHeight4 = 143, bossHeight5 = 143, bossHeight6 = 143,
+    bossHeight4 = 143, bossHeight5 = 143, bossHeightBossRaindow = 143,
     eventHeightEXTREME = 255, eventHeightHARD = 145,
     eventHeightMEDIUM = 256, eventHeightEASY = 156,
     strengthTool = "Weight",
@@ -91,7 +91,7 @@ Core.CHESTS = {
 }
 
 Core.BOSS_HEIGHTS = {
-    Boss1 = 143, Boss2 = 143, Boss3 = 143, Boss4 = 143, Boss5 = 143, Boss6 = 143,
+    Boss1 = 143, Boss2 = 143, Boss3 = 143, Boss4 = 143, Boss5 = 143, BossRaindow = 143,
     ["Grim Reaper"] = 255, ["Frankenbrute"] = 145, ["Pumpkin Titan"] = 256, ["Scarecrow Colossus"] = 156,
 }
 
