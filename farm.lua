@@ -11,10 +11,10 @@ local function build()
         if not v and not Core.settings.collectChest then Core.stopFarm() end
     end, "bossFarm")
 
-    local bossNames = {"Common", "Rare", "Epic", "Legendary", "Mystical", "Rainbow"}
+    local bossKeys = {"bossHeight1", "bossHeight2", "bossHeight3", "bossHeight4", "bossHeight5", "bossHeightBossRaindow"}
+    local bossNames = {"Common", "Rare", "Epic", "Legendary", "Mystical", "BossRaindow"}
 
-    for i = 1, 6 do
-        local key = "bossHeight" .. i
+    for i, key in ipairs(bossKeys) do
         local label = (bossNames[i] or ("Boss" .. i)) .. " Height"
         GUI.makeSlider(page, label, 0, 300, Core.settings[key] or 143, 2 + i, function(v)
             Core.settings[key] = v
@@ -48,6 +48,9 @@ local function build()
     end
 
     local function getBossHeight(name)
+        if name == "BossRaindow" or name == "Rainbow" or name == "Boss6" then
+            return Core.settings["bossHeightBossRaindow"] or 143
+        end
         local idx = tostring(name):match("^Boss(%d+)$")
         if idx then
             return Core.settings["bossHeight" .. idx] or 143
