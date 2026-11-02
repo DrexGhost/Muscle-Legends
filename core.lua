@@ -57,6 +57,11 @@ Core.settings = {
     hatchEggsSelected = {},
     autoEvo = false,
     autoEvoPet = "Apex Overlord",
+    autoSpinHalloween = false,
+    upgBossDamage = false,
+    upgCrystalLuck = false,
+    upgTraining = false,
+    upgCandyCorn = false,
 }
 
 Core.STRENGTH_TOOLS = {"Weight", "Handstands", "Pushups", "Situps"}
