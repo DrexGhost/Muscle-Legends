@@ -169,12 +169,15 @@ local function build()
                     local remote = rEvents and rEvents:FindFirstChild("halloweenWheelRemote")
                     if remote then
                         local ok, res = pcall(function() return remote:InvokeServer("spin") end)
-                        if ok and res and res.Ok == false and res.Reason ~= "tooFar" then
-                            Core.settings.autoSpinHalloween = false
-                            if Core.toggleRefs["autoSpinHalloween"] then
-                                Core.toggleRefs["autoSpinHalloween"].setEnabled(false, true)
+                        if ok and res and res.Ok == false and res.Reason then
+                            local reason = string.lower(tostring(res.Reason))
+                            if string.find(reason, "spin") then
+                                Core.settings.autoSpinHalloween = false
+                                if Core.toggleRefs["autoSpinHalloween"] then
+                                    Core.toggleRefs["autoSpinHalloween"].setEnabled(false, true)
+                                end
+                                break
                             end
-                            break
                         end
                     end
                 end
