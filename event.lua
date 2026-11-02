@@ -1,6 +1,7 @@
 local Core, GUI = ...
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
+local RS = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local VIM = game:GetService("VirtualInputManager")
@@ -149,6 +150,143 @@ local function build()
             Core.punch()
         end
     end)
+
+    GUI.makeSectionHeader(page, "Functional", order)
+    order = order + 1
+
+    local spinThread = nil
+    local function startSpin()
+        if spinThread then pcall(task.cancel, spinThread) end
+        spinThread = task.spawn(function()
+            while Core.settings.autoSpinHalloween do
+                if Core.HRP then
+                    Core.HRP.AssemblyLinearVelocity = Vector3.zero
+                    Core.HRP.AssemblyAngularVelocity = Vector3.zero
+                    Core.HRP.CFrame = CFrame.new(5419, 85, 6264)
+                    task.wait(0.5)
+                    
+                    local rEvents = RS:FindFirstChild("rEvents")
+                    local remote = rEvents and rEvents:FindFirstChild("halloweenWheelRemote")
+                    if remote then
+                        local ok, res = pcall(function() return remote:InvokeServer("spin") end)
+                        if ok and res and res.Ok == false and res.Reason ~= "tooFar" then
+                            Core.settings.autoSpinHalloween = false
+                            if Core.toggleRefs["autoSpinHalloween"] then
+                                Core.toggleRefs["autoSpinHalloween"].setEnabled(false, true)
+                            end
+                            break
+                        end
+                    end
+                end
+                task.wait(1)
+            end
+        end)
+    end
+
+    GUI.makeToggle(page, "Auto Spin", "Автоматически крутит колесо", Core.settings.autoSpinHalloween, order, function(v)
+        Core.settings.autoSpinHalloween = v
+        if v then startSpin() else if spinThread then pcall(task.cancel, spinThread) end end
+    end, "autoSpinHalloween")
+    order = order + 1
+
+    GUI.makeSectionHeader(page, "Upgrade", order)
+    order = order + 1
+
+    local upgradeThread = nil
+    local function startUpgrades()
+        if upgradeThread then pcall(task.cancel, upgradeThread) end
+        upgradeThread = task.spawn(function()
+            while Core.settings.upgBossDamage or Core.settings.upgCrystalLuck or Core.settings.upgTraining or Core.settings.upgCandyCorn do
+                local pkgs = RS:FindFirstChild("packages")
+                local net = pkgs and pkgs:FindFirstChild("Net")
+                local remote = net and net:FindFirstChild("RF/HalloweenUpgrade")
+                
+                if remote then
+                    local upgs = {
+                        {key = "upgBossDamage", name = "BossDamage"},
+                        {key = "upgCrystalLuck", name = "CrystalLuck"},
+                        {key = "upgTraining", name = "Training"},
+                        {key = "upgCandyCorn", name = "CandyCorn"}
+                    }
+                    for _, upg in ipairs(upgs) do
+                        if Core.settings[upg.key] then
+                            local ok, res = pcall(function() return remote:InvokeServer(upg.name) end)
+                            if ok and res then
+                                if (res.Level and res.Level >= 10) or res.Ok == false then
+                                    Core.settings[upg.key] = false
+                                    if Core.toggleRefs[upg.key] then
+                                        Core.toggleRefs[upg.key].setEnabled(false, true)
+                                    end
+                                end
+                            end
+                            task.wait(0.2)
+                        end
+                    end
+                end
+                task.wait(1)
+            end
+        end)
+    end
+
+    GUI.makeToggle(page, "Boss Damage", "Прокачка урона по боссам", Core.settings.upgBossDamage, order, function(v)
+        Core.settings.upgBossDamage = v
+        startUpgrades()
+    end, "upgBossDamage")
+    order = order + 1
+
+    GUI.makeToggle(page, "Crystal Luck", "Прокачка удачи кристаллов", Core.settings.upgCrystalLuck, order, function(v)
+        Core.settings.upgCrystalLuck = v
+        startUpgrades()
+    end, "upgCrystalLuck")
+    order = order + 1
+
+    GUI.makeToggle(page, "Training", "Прокачка тренировки", Core.settings.upgTraining, order, function(v)
+        Core.settings.upgTraining = v
+        startUpgrades()
+    end, "upgTraining")
+    order = order + 1
+
+    GUI.makeToggle(page, "Candy Corn", "Прокачка конфет", Core.settings.upgCandyCorn, order, function(v)
+        Core.settings.upgCandyCorn = v
+        startUpgrades()
+    end, "upgCandyCorn")
+    order = order + 1
+
+    local levelLbl = Instance.new("TextLabel")
+    levelLbl.Size = UDim2.new(1, 0, 0, 75)
+    levelLbl.BackgroundColor3 = Core.T.card
+    levelLbl.BorderSizePixel = 0
+    levelLbl.Text = "Загрузка уровней..."
+    levelLbl.TextColor3 = Core.T.text
+    levelLbl.TextSize = 12
+    levelLbl.Font = Enum.Font.Gotham
+    levelLbl.TextXAlignment = Enum.TextXAlignment.Left
+    levelLbl.TextYAlignment = Enum.TextYAlignment.Top
+    levelLbl.LayoutOrder = order
+    levelLbl.Parent = page
+    
+    local lvlPad = Instance.new("UIPadding", levelLbl)
+    lvlPad.PaddingLeft = UDim.new(0, 10)
+    lvlPad.PaddingTop = UDim.new(0, 5)
+    local lvlCorner = Instance.new("UICorner", levelLbl)
+    lvlCorner.CornerRadius = UDim.new(0, 10)
+    
+    order = order + 1
+
+    task.spawn(function()
+        while GUI.screenGui.Parent do
+            local bd = LocalPlayer:GetAttribute("HalloweenUpgrade_BossDamage") or 0
+            local cl = LocalPlayer:GetAttribute("HalloweenUpgrade_CrystalLuck") or 0
+            local tr = LocalPlayer:GetAttribute("HalloweenUpgrade_Training") or 0
+            local cc = LocalPlayer:GetAttribute("HalloweenUpgrade_CandyCorn") or 0
+            
+            levelLbl.Text = string.format("Boss Damage: %d/10\nCrystal Luck: %d/10\nTraining: %d/10\nCandy Corn: %d/10", bd, cl, tr, cc)
+            task.wait(1)
+        end
+    end)
+
+    if Core.settings.autoSpinHalloween then startSpin() end
+    if Core.settings.upgBossDamage or Core.settings.upgCrystalLuck or Core.settings.upgTraining or Core.settings.upgCandyCorn then startUpgrades() end
 
     GUI.makeSectionHeader(page, "New Event (Race)", order)
     order = order + 1
