@@ -17,10 +17,15 @@ return function(Core, GUI, page, startOrder)
                 local remote = rEvents and rEvents:FindFirstChild("openCrystalRemote")
                 
                 if remote and remote:IsA("RemoteFunction") then
+                    local amount = Core.settings.hatchEggsAmount or 10
                     for _, eggName in ipairs(Core.EGGS_LIST) do
                         if Core.settings.hatchEggsSelected[eggName] and Core.settings.hatchEggs then
                             pcall(function()
-                                remote:InvokeServer("openCrystalBulk", eggName, 10)
+                                if amount == 1 then
+                                    remote:InvokeServer("openCrystal", eggName)
+                                else
+                                    remote:InvokeServer("openCrystalBulk", eggName, amount)
+                                end
                             end)
                         end
                     end
@@ -143,7 +148,7 @@ return function(Core, GUI, page, startOrder)
             local cPos = GUI.Content.AbsolutePosition
             local cSize = GUI.Content.AbsoluteSize
             local menuW = 200
-            local menuH = 250
+            local menuH = 320
             local targetX = cPos.X + (cSize.X / 2) - (menuW / 2)
             local targetY = cPos.Y + (cSize.Y / 2) - (menuH / 2)
 
@@ -170,7 +175,7 @@ return function(Core, GUI, page, startOrder)
             header.Size = UDim2.new(1, -40, 0, 26)
             header.Position = UDim2.new(0, 12, 0, 8)
             header.BackgroundTransparency = 1
-            header.Text = "Select Egg"
+            header.Text = "Hatch Settings"
             header.TextColor3 = T.text
             header.TextSize = 12
             header.Font = Enum.Font.GothamBold
@@ -212,26 +217,28 @@ return function(Core, GUI, page, startOrder)
             listPad.PaddingBottom = UDim.new(0, 4)
             listPad.PaddingRight = UDim.new(0, 2)
 
-            local eggRefs = {}
-
-            local function updateVisuals()
-                for name, ref in pairs(eggRefs) do
-                    local isCurrent = Core.settings.hatchEggsSelected[name] == true
-                    TweenService:Create(ref.Pill, TweenInfo.new(0.15), {BackgroundColor3 = isCurrent and T.accent or T.toggleOff}):Play()
-                    TweenService:Create(ref.Knob, TweenInfo.new(0.15), {Position = isCurrent and UDim2.new(1, -12, 0.5, -5) or UDim2.new(0, 2, 0.5, -5)}):Play()
-                end
+            local function addMenuLabel(text, order)
+                local lbl = Instance.new("TextLabel", list)
+                lbl.Size = UDim2.new(1, 0, 0, 20)
+                lbl.BackgroundTransparency = 1
+                lbl.Text = text
+                lbl.TextColor3 = T.textDim
+                lbl.TextSize = 10
+                lbl.Font = Enum.Font.GothamBold
+                lbl.TextXAlignment = Enum.TextXAlignment.Left
+                lbl.LayoutOrder = order
+                lbl.ZIndex = 102
+                return lbl
             end
 
-            local mOrder = 1
-            for _, eggName in ipairs(Core.EGGS_LIST) do
-                local isActive = Core.settings.hatchEggsSelected[eggName] == true
+            local function addMenuToggle(text, isActive, order, onClick)
                 local btn = Instance.new("TextButton", list)
                 btn.Size = UDim2.new(1, 0, 0, 34)
                 btn.BackgroundColor3 = T.card
                 btn.BorderSizePixel = 0
                 btn.Text = ""
                 btn.AutoButtonColor = false
-                btn.LayoutOrder = mOrder
+                btn.LayoutOrder = order
                 btn.ZIndex = 102
                 Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
 
@@ -239,7 +246,7 @@ return function(Core, GUI, page, startOrder)
                 lbl.Size = UDim2.new(1, -45, 1, 0)
                 lbl.Position = UDim2.new(0, 12, 0, 0)
                 lbl.BackgroundTransparency = 1
-                lbl.Text = eggName
+                lbl.Text = text
                 lbl.TextColor3 = T.text
                 lbl.TextSize = 12
                 lbl.Font = Enum.Font.GothamBold
@@ -264,16 +271,57 @@ return function(Core, GUI, page, startOrder)
                 knob.ZIndex = 104
                 Instance.new("UICorner", knob).CornerRadius = UDim.new(1, 0)
 
-                eggRefs[eggName] = { Pill = pill, Knob = knob }
+                btn.MouseButton1Click:Connect(onClick)
+                return { Button = btn, Pill = pill, Knob = knob }
+            end
 
-                btn.MouseButton1Click:Connect(function()
+            local mOrder = 1
+
+            addMenuLabel("Amount", mOrder)
+            mOrder = mOrder + 1
+
+            local amountRefs = {}
+            local function updateAmountUI()
+                for amt, ref in pairs(amountRefs) do
+                    local isCurrent = (Core.settings.hatchEggsAmount or 10) == amt
+                    TweenService:Create(ref.Pill, TweenInfo.new(0.15), {BackgroundColor3 = isCurrent and T.accent or T.toggleOff}):Play()
+                    TweenService:Create(ref.Knob, TweenInfo.new(0.15), {Position = isCurrent and UDim2.new(1, -12, 0.5, -5) or UDim2.new(0, 2, 0.5, -5)}):Play()
+                end
+            end
+
+            for _, amt in ipairs({1, 3, 10}) do
+                amountRefs[amt] = addMenuToggle(tostring(amt) .. " Egg(s)", (Core.settings.hatchEggsAmount or 10) == amt, mOrder, function()
+                    Core.settings.hatchEggsAmount = amt
+                    Core.saveSetting("hatchEggsAmount", amt)
+                    updateAmountUI()
+                end)
+                mOrder = mOrder + 1
+            end
+
+            addMenuLabel("Select Egg", mOrder)
+            mOrder = mOrder + 1
+
+            local eggRefs = {}
+
+            local function updateEggVisuals()
+                for name, ref in pairs(eggRefs) do
+                    local isCurrent = Core.settings.hatchEggsSelected[name] == true
+                    TweenService:Create(ref.Pill, TweenInfo.new(0.15), {BackgroundColor3 = isCurrent and T.accent or T.toggleOff}):Play()
+                    TweenService:Create(ref.Knob, TweenInfo.new(0.15), {Position = isCurrent and UDim2.new(1, -12, 0.5, -5) or UDim2.new(0, 2, 0.5, -5)}):Play()
+                end
+            end
+
+            for _, eggName in ipairs(Core.EGGS_LIST) do
+                local isActive = Core.settings.hatchEggsSelected[eggName] == true
+                
+                eggRefs[eggName] = addMenuToggle(eggName, isActive, mOrder, function()
                     local currentState = Core.settings.hatchEggsSelected[eggName] == true
                     Core.settings.hatchEggsSelected = {}
                     if not currentState then
                         Core.settings.hatchEggsSelected[eggName] = true
                     end
                     Core.saveSetting("hatchEggsSelected", Core.settings.hatchEggsSelected)
-                    updateVisuals()
+                    updateEggVisuals()
                 end)
                 mOrder = mOrder + 1
             end
