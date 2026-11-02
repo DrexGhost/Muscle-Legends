@@ -55,6 +55,7 @@ Core.settings = {
     strengthUseMode = "default",
     hatchEggs = false,
     hatchEggsSelected = {},
+    hatchEggsAmount = 10,
     autoEvo = false,
     autoEvoPet = "Apex Overlord",
     autoSpinHalloween = false,
