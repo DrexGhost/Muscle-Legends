@@ -72,8 +72,19 @@ local function build()
             if Core.settings.eventBosses[name] == true then
                 local b = Core.EVENT_BOSSES[name]
                 local model = workspace:FindFirstChild(b.model)
+                
+                if not model then
+                    local events = workspace:FindFirstChild("Events")
+                    if events then
+                        model = events:FindFirstChild(b.model, true)
+                    end
+                end
+                
                 if model then
-                    local part = model:FindFirstChild(b.part)
+                    local part = model:FindFirstChild(b.part) 
+                              or model:FindFirstChild("HumanoidRootPart") 
+                              or model.PrimaryPart
+                    
                     if part and part.Position.Y > 0 then
                         return model, part, name
                     end
@@ -103,7 +114,15 @@ local function build()
             elseif outOfWorld then
                 currentBossModel, currentBossPart, bossWasAlive, currentBossName = nil, nil, false, nil
             else
-                local hp = currentBossModel:GetAttribute("Health") or currentBossPart:GetAttribute("Health")
+                local hp = currentBossModel:GetAttribute("Health")
+                if not hp and currentBossPart then
+                    hp = currentBossPart:GetAttribute("Health")
+                end
+                if not hp then
+                    local hum = currentBossModel:FindFirstChildOfClass("Humanoid")
+                    if hum then hp = hum.Health end
+                end
+
                 if hp and hp > 0 then
                     bossWasAlive = true
                 elseif hp and hp <= 0 then
