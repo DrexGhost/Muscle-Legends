@@ -58,11 +58,10 @@ Core.settings = {
     hatchEggsAmount = 10,
     autoEvo = false,
     autoEvoPet = "Apex Overlord",
-    autoSpinHalloween = false,
-    upgBossDamage = false,
-    upgCrystalLuck = false,
-    upgTraining = false,
-    upgCandyCorn = false,
+    upgZeroStr = false,
+    upgZeroDur = false,
+    upgZeroSnow = false,
+    upgZeroLuck = false,
 }
 
 Core.STRENGTH_TOOLS = {"Weight", "Handstands", "Pushups", "Situps"}
@@ -78,6 +77,10 @@ Core.EGGS_LIST = {
     "Galaxy Oracle Crystal",
     "Jungle Crystal",
     "Industrial Crystal",
+}
+
+Core.EVENT_EGGS_LIST = {
+    "Zero Degrees Crystal"
 }
 
 Core.POPULAR_CODES = {
@@ -113,6 +116,7 @@ Core.ABSOLUTE_ORDER = {
     "Golden Rebirth", "Galaxy Gains", "Muscle Mind", "Demon Damage",
     "Infernal Health", "Jungle Swift", "x2 Chest Rewards", "x2 Quest Rewards",
     "+5% Rep Speed", "+1 Pet Slot", "+10 Item Capacity", "+1 Daily Spin",
+    "Boss Slayer",
 }
 
 Core.ABSOLUTE_MAP = {
@@ -122,6 +126,7 @@ Core.ABSOLUTE_MAP = {
     ["x2 Chest Rewards"] = "UltimateChestRewards", ["x2 Quest Rewards"] = "UltimateQuestRewards",
     ["+5% Rep Speed"] = "UltimateRepSpeed", ["+1 Pet Slot"] = "UltimatePetSlot",
     ["+10 Item Capacity"] = "UltimateItemCapacity", ["+1 Daily Spin"] = "UltimateDailySpin",
+    ["Boss Slayer"] = "UltimateBossSlayer",
 }
 
 Core.ABSOLUTE_MAX = {
@@ -129,6 +134,7 @@ Core.ABSOLUTE_MAX = {
     UltimateDemonDamage = 5, UltimateRepSpeed = 10, UltimateInfernalHealth = 5,
     UltimateChestRewards = 5, UltimateJungleSwift = 5, UltimateItemCapacity = 6,
     UltimateQuestRewards = 3, UltimateGalaxyGains = 5, UltimateDailySpin = 5,
+    UltimateBossSlayer = 10,
 }
 
 for _, name in ipairs(Core.ABSOLUTE_ORDER) do
