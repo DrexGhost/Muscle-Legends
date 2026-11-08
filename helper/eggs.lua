@@ -148,7 +148,7 @@ return function(Core, GUI, page, startOrder)
             local cPos = GUI.Content.AbsolutePosition
             local cSize = GUI.Content.AbsoluteSize
             local menuW = 200
-            local menuH = 380
+            local menuH = 320
             local targetX = cPos.X + (cSize.X / 2) - (menuW / 2)
             local targetY = cPos.Y + (cSize.Y / 2) - (menuH / 2)
 
