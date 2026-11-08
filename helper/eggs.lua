@@ -18,8 +18,8 @@ return function(Core, GUI, page, startOrder)
                 
                 if remote and remote:IsA("RemoteFunction") then
                     local amount = Core.settings.hatchEggsAmount or 10
-                    for _, eggName in ipairs(Core.EGGS_LIST) do
-                        if Core.settings.hatchEggsSelected[eggName] and Core.settings.hatchEggs then
+                    for eggName, isSelected in pairs(Core.settings.hatchEggsSelected) do
+                        if isSelected and Core.settings.hatchEggs then
                             pcall(function()
                                 if amount == 1 then
                                     remote:InvokeServer("openCrystal", eggName)
@@ -148,7 +148,7 @@ return function(Core, GUI, page, startOrder)
             local cPos = GUI.Content.AbsolutePosition
             local cSize = GUI.Content.AbsoluteSize
             local menuW = 200
-            local menuH = 320
+            local menuH = 380
             local targetX = cPos.X + (cSize.X / 2) - (menuW / 2)
             local targetY = cPos.Y + (cSize.Y / 2) - (menuH / 2)
 
@@ -298,11 +298,7 @@ return function(Core, GUI, page, startOrder)
                 mOrder = mOrder + 1
             end
 
-            addMenuLabel("Select Egg", mOrder)
-            mOrder = mOrder + 1
-
             local eggRefs = {}
-
             local function updateEggVisuals()
                 for name, ref in pairs(eggRefs) do
                     local isCurrent = Core.settings.hatchEggsSelected[name] == true
@@ -311,9 +307,28 @@ return function(Core, GUI, page, startOrder)
                 end
             end
 
+            addMenuLabel("Select Egg", mOrder)
+            mOrder = mOrder + 1
+
             for _, eggName in ipairs(Core.EGGS_LIST) do
                 local isActive = Core.settings.hatchEggsSelected[eggName] == true
-                
+                eggRefs[eggName] = addMenuToggle(eggName, isActive, mOrder, function()
+                    local currentState = Core.settings.hatchEggsSelected[eggName] == true
+                    Core.settings.hatchEggsSelected = {}
+                    if not currentState then
+                        Core.settings.hatchEggsSelected[eggName] = true
+                    end
+                    Core.saveSetting("hatchEggsSelected", Core.settings.hatchEggsSelected)
+                    updateEggVisuals()
+                end)
+                mOrder = mOrder + 1
+            end
+
+            addMenuLabel("Event", mOrder)
+            mOrder = mOrder + 1
+
+            for _, eggName in ipairs(Core.EVENT_EGGS_LIST) do
+                local isActive = Core.settings.hatchEggsSelected[eggName] == true
                 eggRefs[eggName] = addMenuToggle(eggName, isActive, mOrder, function()
                     local currentState = Core.settings.hatchEggsSelected[eggName] == true
                     Core.settings.hatchEggsSelected = {}
