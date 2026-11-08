@@ -9,6 +9,13 @@ local function build()
 
     GUI.makeSectionHeader(page, "Zero Degrees Upgrade", 1)
 
+    local upgRefs = {}
+    local maxLvl = 10
+
+    local function getLevel(attrName)
+        return LocalPlayer:GetAttribute(attrName) or 0
+    end
+
     local upgradeThread = nil
     local function startUpgrades()
         if upgradeThread then pcall(task.cancel, upgradeThread) end
@@ -45,53 +52,61 @@ local function build()
         end)
     end
 
-    GUI.makeToggle(page, "Strength", "Прокачка силы", Core.settings.upgZeroStr, 2, function(v)
+    upgRefs.Str = GUI.makeToggle(page, "Strength", string.format("Прокачен %d/%d", getLevel("ZeroDegreesUpgrade_Strength"), maxLvl), Core.settings.upgZeroStr, 2, function(v)
         Core.settings.upgZeroStr = v
         startUpgrades()
     end, "upgZeroStr")
 
-    GUI.makeToggle(page, "Durability", "Прокачка выносливости", Core.settings.upgZeroDur, 3, function(v)
+    upgRefs.Dur = GUI.makeToggle(page, "Durability", string.format("Прокачен %d/%d", getLevel("ZeroDegreesUpgrade_Durability"), maxLvl), Core.settings.upgZeroDur, 3, function(v)
         Core.settings.upgZeroDur = v
         startUpgrades()
     end, "upgZeroDur")
 
-    GUI.makeToggle(page, "Snowflakes", "Прокачка снежинок", Core.settings.upgZeroSnow, 4, function(v)
+    upgRefs.Snow = GUI.makeToggle(page, "Snowflakes", string.format("Прокачен %d/%d", getLevel("ZeroDegreesUpgrade_Snowflakes"), maxLvl), Core.settings.upgZeroSnow, 4, function(v)
         Core.settings.upgZeroSnow = v
         startUpgrades()
     end, "upgZeroSnow")
 
-    GUI.makeToggle(page, "Egg Luck", "Прокачка удачи яиц", Core.settings.upgZeroLuck, 5, function(v)
+    upgRefs.Luck = GUI.makeToggle(page, "Egg Luck", string.format("Прокачен %d/%d", getLevel("ZeroDegreesUpgrade_EggLuck"), maxLvl), Core.settings.upgZeroLuck, 5, function(v)
         Core.settings.upgZeroLuck = v
         startUpgrades()
     end, "upgZeroLuck")
 
-    local levelLbl = Instance.new("TextLabel")
-    levelLbl.Size = UDim2.new(1, 0, 0, 75)
-    levelLbl.BackgroundColor3 = Core.T.card
-    levelLbl.BorderSizePixel = 0
-    levelLbl.Text = "Загрузка уровней..."
-    levelLbl.TextColor3 = Core.T.text
-    levelLbl.TextSize = 12
-    levelLbl.Font = Enum.Font.Gotham
-    levelLbl.TextXAlignment = Enum.TextXAlignment.Left
-    levelLbl.TextYAlignment = Enum.TextYAlignment.Top
-    levelLbl.LayoutOrder = 6
-    levelLbl.Parent = page
-    
-    local lvlPad = Instance.new("UIPadding", levelLbl)
-    lvlPad.PaddingLeft = UDim.new(0, 10)
-    lvlPad.PaddingTop = UDim.new(0, 5)
-    local lvlCorner = Instance.new("UICorner", levelLbl)
-    lvlCorner.CornerRadius = UDim.new(0, 10)
-
     task.spawn(function()
         while GUI.screenGui.Parent do
-            local str = LocalPlayer:GetAttribute("ZeroDegreesUpgrade_Strength") or 0
-            local dur = LocalPlayer:GetAttribute("ZeroDegreesUpgrade_Durability") or 0
-            local snow = LocalPlayer:GetAttribute("ZeroDegreesUpgrade_Snowflakes") or 0
-            local luck = LocalPlayer:GetAttribute("ZeroDegreesUpgrade_EggLuck") or 0
-            
-            levelLbl.Text = string.format("Strength: %d\nDurability: %d\nSnowflakes: %d\nEgg Luck: %d", str, dur, snow, luck)
+            local strLvl = getLevel("ZeroDegreesUpgrade_Strength")
+            local durLvl = getLevel("ZeroDegreesUpgrade_Durability")
+            local snowLvl = getLevel("ZeroDegreesUpgrade_Snowflakes")
+            local luckLvl = getLevel("ZeroDegreesUpgrade_EggLuck")
+
+            if upgRefs.Str and upgRefs.Str.Desc then
+                upgRefs.Str.Desc.Text = string.format("Прокачен %d/%d", strLvl, maxLvl)
+                if strLvl >= maxLvl and Core.settings.upgZeroStr then
+                    Core.settings.upgZeroStr = false
+                    upgRefs.Str.Set(false, true)
+                end
+            end
+            if upgRefs.Dur and upgRefs.Dur.Desc then
+                upgRefs.Dur.Desc.Text = string.format("Прокачен %d/%d", durLvl, maxLvl)
+                if durLvl >= maxLvl and Core.settings.upgZeroDur then
+                    Core.settings.upgZeroDur = false
+                    upgRefs.Dur.Set(false, true)
+                end
+            end
+            if upgRefs.Snow and upgRefs.Snow.Desc then
+                upgRefs.Snow.Desc.Text = string.format("Прокачен %d/%d", snowLvl, maxLvl)
+                if snowLvl >= maxLvl and Core.settings.upgZeroSnow then
+                    Core.settings.upgZeroSnow = false
+                    upgRefs.Snow.Set(false, true)
+                end
+            end
+            if upgRefs.Luck and upgRefs.Luck.Desc then
+                upgRefs.Luck.Desc.Text = string.format("Прокачен %d/%d", luckLvl, maxLvl)
+                if luckLvl >= maxLvl and Core.settings.upgZeroLuck then
+                    Core.settings.upgZeroLuck = false
+                    upgRefs.Luck.Set(false, true)
+                end
+            end
             task.wait(1)
         end
     end)
